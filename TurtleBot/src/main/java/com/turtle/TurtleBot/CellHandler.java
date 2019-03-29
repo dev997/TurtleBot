@@ -105,7 +105,7 @@ public class CellHandler {
 			if(isMember(member)) {
 				Long cellcount = (Long) celldata.get(member);
 				cellcount -= cells;
-				celldata.put(member, cells);
+				celldata.put(member, new Long(cellcount));
 				try (FileWriter file = new FileWriter("src/main/celldata.json")){
 					file.write(celldata.toJSONString());
 					file.flush();

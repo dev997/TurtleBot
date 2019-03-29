@@ -25,7 +25,7 @@ public class MsgListener extends ListenerAdapter{
 	public MusicHandler musicHandler = new MusicHandler();
 	public List<AudioTrack> results = new ArrayList<AudioTrack>();
 	private String NO_PERMISSION = "You do not have permission to use this command!";
-	private CellHandler cellhandler = new CellHandler(Driver.jda.getGuilds().get(0));
+	private CellHandler cellhandler = new CellHandler(Driver.jda.getGuilds().get(1));
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
@@ -83,8 +83,8 @@ public class MsgListener extends ListenerAdapter{
 			}else {
 				event.getChannel().sendMessage("Command is currently disabled").queue();
 			}
-		}else if(content.startsWith(Driver.COMMAND_START+"give")) {
-			
+		}else if(content.startsWith(Driver.COMMAND_START+"braincells")) {
+			getCellTotal(event);
 		}
 	}
 	
@@ -419,6 +419,10 @@ public class MsgListener extends ListenerAdapter{
 				}
 			}
 		}
+	}
+	
+	public void getCellTotal(MessageReceivedEvent event) {
+		event.getChannel().sendMessage("Current Brain Cell total is: "+cellhandler.getServerTotal()).queue();
 	}
 
 }

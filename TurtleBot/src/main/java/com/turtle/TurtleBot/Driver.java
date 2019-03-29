@@ -49,6 +49,11 @@ public class Driver extends ListenerAdapter{
 			public void actionPerformed(ActionEvent e){
 				jda.shutdown();
 				startUp();
+				try {
+					Thread.sleep(3000);
+				}catch(Exception d) {
+				}
+				setListeners();
 			}
     	});
     	
@@ -58,21 +63,28 @@ public class Driver extends ListenerAdapter{
     	bottompanel.add(Disable_Move);
     	frame.setVisible(true);
     	startUp();
+    	try {
+			Thread.sleep(3000);
+		}catch(Exception e) {
+		}
+    	setListeners();
     }
     
     @SuppressWarnings("deprecation")
 	public static void startUp() {
     	try {
-	    	jda = new JDABuilder(AccountType.BOT).setToken("NDc3MzYxMjIyNzkwOTM4NjI0.DlzmRA.hf_szqxGc_6xHeNTmevBAGOdq2E").buildAsync();
-	        Thread.sleep(1000);
-	    	jda.addEventListener(new MsgListener());
-	    	jda.addEventListener(new ListenerAdapter() {
-	    		public void onStatusChange(StatusChangeEvent e) {
-	    			status.setText(e.getNewStatus().toString());
-	    		}
-	    	});
+    		jda = new JDABuilder(AccountType.BOT).setToken("NDc3MzYxMjIyNzkwOTM4NjI0.DlzmRA.hf_szqxGc_6xHeNTmevBAGOdq2E").buildAsync();
     	}catch(Exception e) {
     		e.printStackTrace();
     	}
+    }
+    
+    public static void setListeners() {
+    	jda.addEventListener(new MsgListener());
+    	jda.addEventListener(new ListenerAdapter() {
+    		public void onStatusChange(StatusChangeEvent e) {
+    			status.setText(e.getNewStatus().toString());
+    		}
+    	});
     }
 }

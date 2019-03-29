@@ -3,6 +3,7 @@ package com.turtle.TurtleBot;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.json.simple.*;
 import org.json.simple.JSONObject;
@@ -47,11 +48,36 @@ public class CellHandler {
 			}
 			writer.write(celldata.toJSONString());
 			writer.flush();
+			
+			/*
+			 * Thread watches the voice channel for people in 1 hour intervals and removes cells
+			 * from the ones that are still in the channel
+			 * 
+			 */
+			Thread thread = new Thread(new Runnable() {
+				public void run() {
+					try {
+						while(true) {
+							List<Member> members = Driver.jda.getGuilds().get(1).getVoiceChannelById("530263582227693568").getMembers();
+							Thread.sleep(TimeUnit.HOURS.toMillis(1)); //10 minutes in milliseconds
+							List<Member> newmembers = Driver.jda.getGuilds().get(1).getVoiceChannelById("530263582227693568").getMembers();
+							for(Member member : newmembers) {
+								if(members.contains(member)) {
+									removeCells(member, 1);
+								}
+							}
+						}
+					}catch(Exception e) {
+						
+					}
+				}
+			});
+			thread.start();
 		}
 		
 		public boolean addMember(Member member) throws IOException{
 			if(!isMember(member)) {
-				celldata.put(member, new Long(0));
+				celldata.put(member, new Long(100));
 				try (FileWriter file = new FileWriter("src/main/celldata.json")){
 					file.write(celldata.toJSONString());
 					file.flush();
@@ -93,7 +119,11 @@ public class CellHandler {
 			if(celldata.containsKey(member)) {
 				return true;
 			}
-			return true;
+			return false;
+		}
+		
+		public Long getServerTotal() {
+			return (Long) celldata.get("ServerTotal");
 		}
 		
 }

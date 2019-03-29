@@ -32,7 +32,7 @@ public class Driver extends ListenerAdapter{
     	disable = false;
     	JLabel disable_text = new JLabel("Enabled");
     	
-    	JButton Disable_Move = new JButton("Disable Move Command");
+    	JButton Disable_Move = new JButton("Toggle Move Command");
     	Disable_Move.addActionListener(new ActionListener() {
     		public void actionPerformed(ActionEvent e) {
     			disable = !disable;
@@ -64,6 +64,7 @@ public class Driver extends ListenerAdapter{
 	public static void startUp() {
     	try {
 	    	jda = new JDABuilder(AccountType.BOT).setToken("NDc3MzYxMjIyNzkwOTM4NjI0.DlzmRA.hf_szqxGc_6xHeNTmevBAGOdq2E").buildAsync();
+	        Thread.sleep(1000);
 	    	jda.addEventListener(new MsgListener());
 	    	jda.addEventListener(new ListenerAdapter() {
 	    		public void onStatusChange(StatusChangeEvent e) {

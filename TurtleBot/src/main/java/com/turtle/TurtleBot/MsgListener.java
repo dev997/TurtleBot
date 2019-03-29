@@ -25,6 +25,7 @@ public class MsgListener extends ListenerAdapter{
 	public MusicHandler musicHandler = new MusicHandler();
 	public List<AudioTrack> results = new ArrayList<AudioTrack>();
 	private String NO_PERMISSION = "You do not have permission to use this command!";
+	private CellHandler cellhandler = new CellHandler(Driver.jda.getGuilds().get(0));
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
@@ -82,8 +83,8 @@ public class MsgListener extends ListenerAdapter{
 			}else {
 				event.getChannel().sendMessage("Command is currently disabled").queue();
 			}
-		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"fortnite")) {
-			fortniteSound(event);
+		}else if(content.startsWith(Driver.COMMAND_START+"give")) {
+			
 		}
 	}
 	
@@ -419,11 +420,5 @@ public class MsgListener extends ListenerAdapter{
 			}
 		}
 	}
-	
-	public void fortniteSound(MessageReceivedEvent event) {
-		Member member = event.getMember();
-		VoiceChannel voicechannel = member.getVoiceState().getChannel();
-		musicHandler.joinChannel(voicechannel);
-		musicHandler.playTrack("https://youtu.be/yzy6Mroklpw");
-	}
+
 }

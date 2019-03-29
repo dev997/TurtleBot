@@ -126,4 +126,8 @@ public class CellHandler {
 			return (Long) celldata.get("ServerTotal");
 		}
 		
+		public Long getCells(Member member) {
+			return (Long) celldata.get(member);
+		}
+		
 }

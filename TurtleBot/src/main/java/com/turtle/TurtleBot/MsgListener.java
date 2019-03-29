@@ -85,6 +85,8 @@ public class MsgListener extends ListenerAdapter{
 			}
 		}else if(content.startsWith(Driver.COMMAND_START+"braincells")) {
 			getCellTotal(event);
+		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"cell count")) {
+			getCells(event);
 		}
 	}
 	
@@ -423,6 +425,10 @@ public class MsgListener extends ListenerAdapter{
 	
 	public void getCellTotal(MessageReceivedEvent event) {
 		event.getChannel().sendMessage("Current Brain Cell total is: "+cellhandler.getServerTotal()).queue();
+	}
+	
+	public void getCells(MessageReceivedEvent event) {
+		event.getChannel().sendMessage("Your current Brain Cell total is: "+cellhandler.getCells(event.getMember())).queue();
 	}
 
 }

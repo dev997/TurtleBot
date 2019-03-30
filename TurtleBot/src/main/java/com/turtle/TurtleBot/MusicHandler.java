@@ -13,6 +13,7 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeSearchProvider;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.*;
 
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.managers.AudioManager;
 import java.net.URL;
@@ -24,8 +25,10 @@ public class MusicHandler {
 	public AudioManager audiomanager;
 	public List<AudioTrack> results;
 	public static Timer timer;
+	private Guild server;
 	
-	public MusicHandler() {
+	public MusicHandler(Guild server) {
+		this.server=server;
 		playermanager = new DefaultAudioPlayerManager();
 		AudioSourceManagers.registerRemoteSources(playermanager);
 		createAudioPlayer();
@@ -200,4 +203,7 @@ public class MusicHandler {
 		}
 	}
 	
+	public Guild getServer() {
+		return server;
+	}
 }

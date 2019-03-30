@@ -22,10 +22,10 @@ public class MsgListener extends ListenerAdapter{
 	public QuoteHandler quotehandler = new QuoteHandler();
 	public String quotecommand = Driver.COMMAND_START+"quote";
 	public String audiocommand = Driver.COMMAND_START+"play";
-	public MusicHandler musicHandler = new MusicHandler();
 	public List<AudioTrack> results = new ArrayList<AudioTrack>();
 	private String NO_PERMISSION = "You do not have permission to use this command!";
 	private CellHandler cellhandler = new CellHandler(Driver.jda.getGuilds().get(1));
+	public List<MusicHandler> musichandlerlist;
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
@@ -59,7 +59,7 @@ public class MsgListener extends ListenerAdapter{
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"resume")) {
 			resumeTrack(content, event);
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"leave")) {
-			leaveVoice();
+			leaveVoice(event);
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"skip")){
 			skipSong(content, event);
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"earrape")) {
@@ -143,6 +143,22 @@ public class MsgListener extends ListenerAdapter{
 	}
 	
 	public void playTrack(String content, MessageReceivedEvent event) {
+		boolean hashandler = false;
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			Guild guild = event.getGuild();
+			AudioManager audiomanager = guild.getAudioManager();
+			if(handler.getServer() == guild) {
+				handler.setManager(audiomanager);
+				hashandler = true;
+				break;
+			}
+		}
+		if(!hashandler) {
+			musicHandler = new MusicHandler(event.getGuild());
+			musichandlerlist.add(musicHandler);
+		}
+		
 		boolean isSelection = false;
 		int index = 0;
 		AudioTrack addedtrack = null;
@@ -159,9 +175,6 @@ public class MsgListener extends ListenerAdapter{
 			return;
 		}
 		
-		Guild guild = event.getGuild();
-		AudioManager audiomanager = guild.getAudioManager();
-		musicHandler.setManager(audiomanager);
 		//for link
 		if(content.substring(6).startsWith("http")) {
 			Member member = event.getMember();
@@ -191,7 +204,7 @@ public class MsgListener extends ListenerAdapter{
 				for(AudioTrack song : results) {
 					sb.append(i+". ");
 					sb.append(song.getInfo().title);
-					sb.append(buildTimeString(song.getInfo(), false));
+					sb.append(buildTimeString(event, song.getInfo(), false));
 					sb.append("\n");
 					i++;
 				}
@@ -205,6 +218,14 @@ public class MsgListener extends ListenerAdapter{
 	}
 	
 	public void getQueue(String content, MessageReceivedEvent event) {
+		
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
+		
 		List<AudioTrackInfo> queue = musicHandler.getQueue();
 		MessageChannel channel = event.getChannel();
 		if(queue.isEmpty()){
@@ -215,7 +236,7 @@ public class MsgListener extends ListenerAdapter{
 		for(int i=1; i<=queue.size(); i++) {
 			sb.append(i+". ");
 			sb.append(queue.get(i-1).title);
-			sb.append(buildTimeString(queue.get(i-1), false));
+			sb.append(buildTimeString(event, queue.get(i-1), false));
 			sb.append("\n");
 			if(i>=10) {
 				int size = queue.size()-10;
@@ -230,28 +251,62 @@ public class MsgListener extends ListenerAdapter{
 	}
 	
 	public void stopTrack(String content, MessageReceivedEvent event) {
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
 		musicHandler.clear();
 		MessageChannel channel = event.getChannel();
 		channel.sendMessage("Stopped and cleared queue").queue();
 	}
 	
 	public void pauseTrack(String content, MessageReceivedEvent event) {
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
 		musicHandler.pause();
 		MessageChannel channel = event.getChannel();
 		channel.sendMessage("Paused track: "+musicHandler.getPlayer().getPlayingTrack().getInfo().title).queue();
 	}
 	
 	public void resumeTrack(String content, MessageReceivedEvent event) {
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
 		musicHandler.resume();
 		MessageChannel channel = event.getChannel();
 		channel.sendMessage("Resumed track: "+musicHandler.getPlayer().getPlayingTrack().getInfo().title);
 	}
 	
-	public void leaveVoice() {
+	public void leaveVoice(MessageReceivedEvent event) {
+		
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
+		
 		musicHandler.leaveChannel();
 	}
 	
 	public void nowPlaying(String content, MessageReceivedEvent event) {
+		
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
+		
 		String title;
 		AudioTrack track = musicHandler.getPlayer().getPlayingTrack();
 		try {
@@ -260,13 +315,21 @@ public class MsgListener extends ListenerAdapter{
 			title = null;
 		}
 		if(title!=null && title!=" " && title!="") {
-			event.getChannel().sendMessage("Currently Playing: "+title+buildTimeString(track.getInfo(), true)).queue();
+			event.getChannel().sendMessage("Currently Playing: "+title+buildTimeString(event, track.getInfo(), true)).queue();
 		}else {
 			event.getChannel().sendMessage("Nothing is playing").queue();
 		}
 	}
 	
 	public void skipSong(String content, MessageReceivedEvent event) {
+		
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
+		
 		AudioTrack song = musicHandler.getPlayer().getPlayingTrack();
 		musicHandler.skip();
 		AudioTrack newsong = musicHandler.getPlayer().getPlayingTrack();
@@ -301,6 +364,14 @@ public class MsgListener extends ListenerAdapter{
 	}
 	
 	public void changeVolume(String content, MessageReceivedEvent event) {
+		
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
+		
 		try {
 			String message = "**EARRAPE MODE ACTIVATED**";
 			int level = 1000;
@@ -315,7 +386,15 @@ public class MsgListener extends ListenerAdapter{
 		}
 	}
 	
-	public String buildTimeString(AudioTrackInfo song, boolean isNp) {
+	public String buildTimeString(MessageReceivedEvent event, AudioTrackInfo song, boolean isNp) {
+		
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
+		
 		String songtime = "";
 		String playtime = "(";
 		Long length = song.length;
@@ -370,10 +449,26 @@ public class MsgListener extends ListenerAdapter{
 	}
 	
 	public void toggleRepeat(String content, MessageReceivedEvent event) {
+		
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
+		
 		event.getChannel().sendMessage(musicHandler.setRepeat()).queue();
 	}
 	
 	public void mrBones(MessageReceivedEvent event) {
+		
+		MusicHandler musicHandler = null;
+		for(MusicHandler handler : musichandlerlist) {
+			if(handler.getServer() == event.getGuild()) {
+				musicHandler = handler;
+			}
+		}
+		
 		Member member = event.getMember();
 		VoiceChannel voicechannel = member.getVoiceState().getChannel();
 		musicHandler.joinChannel(voicechannel);

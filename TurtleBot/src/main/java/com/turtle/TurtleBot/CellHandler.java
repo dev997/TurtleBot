@@ -58,12 +58,18 @@ public class CellHandler {
 				public void run() {
 					try {
 						while(true) {
-							List<Member> members = Driver.jda.getGuilds().get(1).getVoiceChannelById("530263582227693568").getMembers();
+							List<Member> members = server.getVoiceChannelById("530263582227693568").getMembers();
 							Thread.sleep(TimeUnit.HOURS.toMillis(1)); //10 minutes in milliseconds
-							List<Member> newmembers = Driver.jda.getGuilds().get(1).getVoiceChannelById("530263582227693568").getMembers();
+							List<Member> newmembers = server.getVoiceChannelById("530263582227693568").getMembers();
 							for(Member member : newmembers) {
 								if(members.contains(member)) {
 									removeCells(member, 1);
+								}
+							}
+							
+							for(Member member : server.getMembers()) {
+								if(newmembers.contains(member)) {
+									addCells(member, 1);
 								}
 							}
 						}

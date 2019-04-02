@@ -19,12 +19,12 @@ import net.dv8tion.jda.core.managers.AudioManager;
 import java.net.URL;
 
 public class MusicHandler {
-	public static AudioPlayerManager playermanager;
-	public static AudioPlayer player;
+	public AudioPlayerManager playermanager;
+	public AudioPlayer player;
 	public TrackScheduler trackScheduler;
 	public AudioManager audiomanager;
 	public List<AudioTrack> results;
-	public static Timer timer;
+	public Timer timer;
 	private Guild server;
 	
 	public MusicHandler(Guild server) {

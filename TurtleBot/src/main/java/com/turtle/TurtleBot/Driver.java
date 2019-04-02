@@ -49,11 +49,7 @@ public class Driver extends ListenerAdapter{
 			public void actionPerformed(ActionEvent e){
 				jda.shutdown();
 				startUp();
-				try {
-					Thread.sleep(3000);
-				}catch(Exception d) {
-				}
-				setListeners();
+				setListeners(jda, status);
 			}
     	});
     	
@@ -63,11 +59,7 @@ public class Driver extends ListenerAdapter{
     	bottompanel.add(Disable_Move);
     	frame.setVisible(true);
     	startUp();
-    	try {
-			Thread.sleep(3000);
-		}catch(Exception e) {
-		}
-    	setListeners();
+    	setListeners(jda, status);
     }
     
     @SuppressWarnings("deprecation")
@@ -79,11 +71,13 @@ public class Driver extends ListenerAdapter{
     	}
     }
     
-    public static void setListeners() {
-    	jda.addEventListener(new MsgListener());
+    public static void setListeners(JDA jda, JLabel status) {
     	jda.addEventListener(new ListenerAdapter() {
     		public void onStatusChange(StatusChangeEvent e) {
-    			status.setText(e.getNewStatus().toString());
+    			status.setText(jda.getStatus().toString());
+    			if(jda.getStatus().toString().equals("CONNECTED")) {
+    				jda.addEventListener(new MsgListener());
+    			}
     		}
     	});
     }

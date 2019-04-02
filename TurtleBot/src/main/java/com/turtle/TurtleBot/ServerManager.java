@@ -17,9 +17,9 @@ import net.dv8tion.jda.core.managers.GuildController;
 
 public class ServerManager {
 	
-	List<MusicHandler> musichandlerlist;
+	List<MusicHandler> musichandlerlist = new ArrayList<MusicHandler>();
 	List<Guild> servers;
-	List<AudioTrack> results;
+	List<AudioTrack> results = new ArrayList<AudioTrack>();
 	public QuoteHandler quotehandler = new QuoteHandler();
 	private String NO_PERMISSION = "You do not have permission to use this command!";
 	private CellHandler cellhandler = new CellHandler(Driver.jda.getGuilds().get(1));
@@ -90,11 +90,12 @@ public class ServerManager {
 	public void playTrack(String content, MessageReceivedEvent event) {
 		boolean hashandler = false;
 		MusicHandler musicHandler = null;
+		Guild guild = event.getGuild();
+		AudioManager audiomanager = guild.getAudioManager();
 		for(MusicHandler handler : musichandlerlist) {
-			Guild guild = event.getGuild();
-			AudioManager audiomanager = guild.getAudioManager();
 			if(handler.getServer() == guild) {
 				handler.setManager(audiomanager);
+				musicHandler = handler;
 				hashandler = true;
 				break;
 			}

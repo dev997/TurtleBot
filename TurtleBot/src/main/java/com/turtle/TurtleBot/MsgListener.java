@@ -82,6 +82,14 @@ public class MsgListener extends ListenerAdapter{
 			manager.getCellTotal(event);
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"cell count")) {
 			manager.getCells(event);
+		}else if(content.startsWith(Driver.COMMAND_START+"target")) {
+			manager.targetCells(event, content);
+		}else if(content.startsWith(Driver.COMMAND_START+"check")){
+			manager.checkCells(event, content);
+		}else if(content.startsWith(Driver.COMMAND_START+"give")) {
+			manager.giveCells(event, content);
+		}else if(content.startsWith(Driver.COMMAND_START+"take")){
+			manager.takeCells(event, content);
 		}
 	}
 

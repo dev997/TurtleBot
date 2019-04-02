@@ -2,7 +2,9 @@ package com.turtle.TurtleBot;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.json.simple.*;
@@ -10,10 +12,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.utils.tuple.Pair;
 
 public class CellHandler {
 	
-		JSONObject celldata = new JSONObject();
+		JSONObject celldata;
+		HashMap<Member, Pair<Member, Integer>> targetlist = new HashMap<Member, Pair<Member, Integer>>();
+		JSONObject targetdata;
 	
 		public CellHandler(Guild server) {
 			try {
@@ -23,12 +28,30 @@ public class CellHandler {
 		}
 	
 		public void initCells(Guild server) throws IOException{
+			// Read data from celldata
 			try {
 				FileReader reader = new FileReader("src/main/celldata.json");
 				JSONParser parser = new JSONParser();
 				celldata = (JSONObject) parser.parse(reader);
 			}catch(Exception e) {
+				if(celldata==null) {
+					celldata = new JSONObject();
+				}
 			}
+			// Read data from targetdata
+			try {
+				FileReader reader = new FileReader("src/main/targetdata.json");
+				JSONParser parser = new JSONParser();
+				targetdata = (JSONObject) parser.parse(reader);
+				targetlist = (HashMap) targetdata.get("Targets");
+			}catch(Exception e) {
+				if(targetdata==null) {
+					targetdata = new JSONObject();
+				}
+			}
+			//saves new files
+			saveData();
+			
 			
 			List<Member> members = server.getMembers();
 			FileWriter writer = new FileWriter("src/main/celldata.json");
@@ -59,17 +82,32 @@ public class CellHandler {
 					try {
 						while(true) {
 							recountTotal();
+							saveData();
+							
+							for(Map.Entry<Member, Pair<Member, Integer>> pair : targetlist.entrySet()) {
+								if(pair.getValue().getRight() <= 3) {
+									addCells(pair.getKey(), 20);
+									removeCells(pair.getValue().getLeft(), 20);
+									
+									Pair<Member, Integer> newpair = Pair.of(pair.getValue().getLeft(), pair.getValue().getRight()+1);
+									targetlist.put(pair.getKey(), newpair);
+								}else {
+									targetlist.remove(pair.getKey());
+								}
+							}
+							
 							List<Member> members = server.getVoiceChannelById("530263582227693568").getMembers();
 							Thread.sleep(TimeUnit.MINUTES.toMillis(30)); //Time in milliseconds
 							List<Member> newmembers = server.getVoiceChannelById("530263582227693568").getMembers();
 							for(Member member : newmembers) {
 								if(members.contains(member)) {
-									addCells(member, 10);
+									addCells(member, 5);
 								}
 							}
 						}
 					}catch(Exception e) {
 					}
+					recountTotal();
 				}
 			});
 			thread.start();
@@ -92,10 +130,7 @@ public class CellHandler {
 				Long cellcount = (Long) celldata.get(member);
 				cellcount += cells;
 				celldata.put(member, new Long(cellcount));
-				try (FileWriter file = new FileWriter("src/main/celldata.json")){
-					file.write(celldata.toJSONString());
-					file.flush();
-				}
+				saveData();
 				return true;
 			}
 			return false;
@@ -106,10 +141,7 @@ public class CellHandler {
 				Long cellcount = (Long) celldata.get(member);
 				cellcount -= cells;
 				celldata.put(member, new Long(cellcount));
-				try (FileWriter file = new FileWriter("src/main/celldata.json")){
-					file.write(celldata.toJSONString());
-					file.flush();
-				}
+				saveData();
 				return true;
 			}
 			return false;
@@ -138,6 +170,39 @@ public class CellHandler {
 				}
 			}
 			celldata.put("ServerTotal", cellcount);
+		}
+		
+		public boolean targetCells(Member user, Member target) {
+			if(targetlist.containsKey(user)) {
+				return false;
+			}else {
+				Pair<Member, Integer> data = Pair.of(target, 0);
+				if((Long) celldata.get(user) >= 30) {
+					try {
+						removeCells(user, 30);
+						targetlist.put(user, data);
+					}catch(Exception e) {
+					}
+				}
+				recountTotal();
+				try {
+					saveData();
+				}catch(Exception e) {
+				}
+				return true;
+			}
+		}
+		
+		public void saveData() throws IOException{
+			targetdata.put("Targets", targetlist);
+			try (FileWriter file = new FileWriter("src/main/targetdata.json")){
+				file.write(targetdata.toJSONString());
+				file.flush();
+			}
+			try (FileWriter file = new FileWriter("src/main/celldata.json")){
+				file.write(celldata.toJSONString());
+				file.flush();
+			}
 		}
 		
 }

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
@@ -306,7 +308,6 @@ public class ServerManager {
             					Driver.COMMAND_START+"skip - skips the currently playing song\n"+
             					Driver.COMMAND_START+"earrape - toggles earrape mode").queue();
         //});
-		
 	}
 	
 	public void changeVolume(String content, MessageReceivedEvent event) {
@@ -470,6 +471,57 @@ public class ServerManager {
 	
 	public void getCells(MessageReceivedEvent event) {
 		event.getChannel().sendMessage("Your current Brain Cell total is: "+cellhandler.getCells(event.getMember())).queue();
+	}
+	
+	public void targetCells(MessageReceivedEvent event, String content) {
+		Pattern pattern = Pattern.compile("\\d+");
+		Matcher matcher = pattern.matcher(content);
+		matcher.find();
+		Member target = event.getGuild().getMemberById(matcher.group());
+		Member user = event.getMember();
+		if(cellhandler.targetCells(user, target)) {
+			event.getChannel().sendMessage(user.getEffectiveName()+" has targeted "+target.getEffectiveName()+"!").queue();
+		}else {
+			event.getChannel().sendMessage("You can only target one person at a time").queue();
+		}
+	}
+	
+	public void checkCells(MessageReceivedEvent event, String content) {
+		Pattern pattern = Pattern.compile("\\d+");
+		Matcher matcher = pattern.matcher(content);
+		matcher.find();
+		Member target = event.getGuild().getMemberById(matcher.group());
+		event.getChannel().sendMessage(target.getEffectiveName()+" brain cell count is: "+cellhandler.getCells(target)).queue();
+	}
+	
+	public void giveCells(MessageReceivedEvent event, String content) {
+		if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+			Pattern pattern = Pattern.compile("([0-9]+)");
+			Matcher matcher = pattern.matcher(content);
+			matcher.find();
+			Member target = event.getGuild().getMemberById(matcher.group());
+			try {
+				matcher.find();
+				cellhandler.addCells(target, Integer.parseInt(matcher.group(1)));
+			}catch(Exception e) {
+			}
+			event.getChannel().sendMessage(target.getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
+		}
+	}
+	
+	public void takeCells(MessageReceivedEvent event, String content) {
+		if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+			Pattern pattern = Pattern.compile("([0-9]+)");
+			Matcher matcher = pattern.matcher(content);
+			matcher.find();
+			Member target = event.getGuild().getMemberById(matcher.group(0));
+			try {
+				matcher.find();
+				cellhandler.removeCells(target, Integer.parseInt(matcher.group(0)));
+			}catch(Exception e) {
+			}
+			event.getChannel().sendMessage(target.getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
+		}
 	}
 	
 }

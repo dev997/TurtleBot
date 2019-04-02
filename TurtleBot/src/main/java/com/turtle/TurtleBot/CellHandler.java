@@ -56,9 +56,10 @@ public class CellHandler {
 			List<Member> members = server.getMembers();
 			FileWriter writer = new FileWriter("src/main/celldata.json");
 			
-			for(int i=0; i<members.size()-1; i++) {
-				if(!isMember(members.get(i))) {
-					addMember(members.get(i));
+			for(Member member : members) {
+				if(!isMember(member)) {
+					addMember(member);
+					System.out.println(isMember(member));
 				}
 			}
 			
@@ -69,8 +70,7 @@ public class CellHandler {
 				}
 				celldata.put("ServerTotal", celltotal);
 			}
-			writer.write(celldata.toJSONString());
-			writer.flush();
+			saveData();
 			
 			/*
 			 * Thread watches the voice channel for people in 1 hour intervals and removes cells
@@ -82,7 +82,6 @@ public class CellHandler {
 					try {
 						while(true) {
 							recountTotal();
-							saveData();
 							
 							for(Map.Entry<Member, Pair<Member, Integer>> pair : targetlist.entrySet()) {
 								if(pair.getValue().getRight() <= 3) {
@@ -127,7 +126,7 @@ public class CellHandler {
 			
 		public boolean addCells(Member member, int cells) throws IOException{
 			if(isMember(member)) {
-				Long cellcount = (Long) celldata.get(member);
+				Long cellcount = (Long) celldata.get(member.toString());
 				cellcount += cells;
 				celldata.put(member, new Long(cellcount));
 				saveData();
@@ -138,7 +137,7 @@ public class CellHandler {
 		
 		public boolean removeCells(Member member, int cells) throws IOException {
 			if(isMember(member)) {
-				Long cellcount = (Long) celldata.get(member);
+				Long cellcount = (Long) celldata.get(member.toString());
 				cellcount -= cells;
 				celldata.put(member, new Long(cellcount));
 				saveData();
@@ -148,7 +147,7 @@ public class CellHandler {
 		}
 		
 		public boolean isMember(Member member) {
-			if(celldata.containsKey(member)) {
+			if(celldata.keySet().contains(member.toString())) {
 				return true;
 			}
 			return false;
@@ -159,7 +158,7 @@ public class CellHandler {
 		}
 		
 		public Long getCells(Member member) {
-			return (Long) celldata.get(member);
+			return (Long) celldata.get(member.toString());
 		}
 		
 		public void recountTotal() {
@@ -170,6 +169,10 @@ public class CellHandler {
 				}
 			}
 			celldata.put("ServerTotal", cellcount);
+			try {
+				saveData();
+			}catch(Exception e) {
+			}
 		}
 		
 		public boolean targetCells(Member user, Member target) {
@@ -177,7 +180,7 @@ public class CellHandler {
 				return false;
 			}else {
 				Pair<Member, Integer> data = Pair.of(target, 0);
-				if((Long) celldata.get(user) >= 30) {
+				if((Long) celldata.get(user.toString()) >= 30) {
 					try {
 						removeCells(user, 30);
 						targetlist.put(user, data);

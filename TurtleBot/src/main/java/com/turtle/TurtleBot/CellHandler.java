@@ -58,23 +58,17 @@ public class CellHandler {
 				public void run() {
 					try {
 						while(true) {
+							recountTotal();
 							List<Member> members = server.getVoiceChannelById("530263582227693568").getMembers();
-							Thread.sleep(TimeUnit.HOURS.toMillis(1)); //10 minutes in milliseconds
+							Thread.sleep(TimeUnit.MINUTES.toMillis(30)); //Time in milliseconds
 							List<Member> newmembers = server.getVoiceChannelById("530263582227693568").getMembers();
 							for(Member member : newmembers) {
 								if(members.contains(member)) {
-									removeCells(member, 1);
-								}
-							}
-							
-							for(Member member : server.getMembers()) {
-								if(newmembers.contains(member)) {
-									addCells(member, 1);
+									addCells(member, 10);
 								}
 							}
 						}
 					}catch(Exception e) {
-						
 					}
 				}
 			});
@@ -134,6 +128,16 @@ public class CellHandler {
 		
 		public Long getCells(Member member) {
 			return (Long) celldata.get(member);
+		}
+		
+		public void recountTotal() {
+			Long cellcount = new Long(0);
+			for(Object obj : celldata.keySet()) {
+				if(!obj.toString().equals("ServerTotal")) {
+					cellcount += (Long) celldata.get(obj);
+				}
+			}
+			celldata.put("ServerTotal", cellcount);
 		}
 		
 }

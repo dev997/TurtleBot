@@ -59,13 +59,8 @@ public class MsgListener extends ListenerAdapter{
 			manager.skipSong(content, event);
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"earrape")) {
 			manager.changeVolume(content, event);
-		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"grape")) {
-			File grape_file = new File("src/main/grape.png");
-			manager.sendContent(content, event, grape_file);
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"repeat")) {
 			manager.toggleRepeat(content, event);
-		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"mr bones")) {
-			manager.mrBones(event);
 		}else if(content.startsWith(Driver.COMMAND_START+"move")) {
 			if(!Driver.disable) {
 				manager.moveMember(event, content);

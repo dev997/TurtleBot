@@ -387,7 +387,7 @@ public class ServerManager {
 		
 	}
 	
-	public void NoPerms(MessageChannel channel) {
+	public void noPerms(MessageChannel channel) {
 		channel.sendMessage(NO_PERMISSION).queue();
 	}
 	
@@ -405,21 +405,6 @@ public class ServerManager {
 		}
 		
 		event.getChannel().sendMessage(musicHandler.setRepeat()).queue();
-	}
-	
-	public void mrBones(MessageReceivedEvent event) {
-		
-		MusicHandler musicHandler = null;
-		for(MusicHandler handler : musichandlerlist) {
-			if(handler.getServer() == event.getGuild()) {
-				musicHandler = handler;
-			}
-		}
-		
-		Member member = event.getMember();
-		VoiceChannel voicechannel = member.getVoiceState().getChannel();
-		musicHandler.joinChannel(voicechannel);
-		musicHandler.playTrack("https://youtu.be/_MkUCE8cMUY");
 	}
 	
 	public void moveMember(MessageReceivedEvent event, String content) {
@@ -506,6 +491,8 @@ public class ServerManager {
 			}catch(Exception e) {
 			}
 			event.getChannel().sendMessage(target.getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
+		}else {
+			noPerms(event.getChannel());
 		}
 	}
 	
@@ -521,6 +508,8 @@ public class ServerManager {
 			}catch(Exception e) {
 			}
 			event.getChannel().sendMessage(target.getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
+		}else {
+			noPerms(event.getChannel());
 		}
 	}
 	

@@ -450,22 +450,18 @@ public class ServerManager {
 		}
 	}
 	
-	public void getCellTotal(MessageReceivedEvent event) {
-		event.getChannel().sendMessage("Current Brain Cell total is: "+cellhandler.getServerTotal()).queue();
-	}
-	
 	public void getCells(MessageReceivedEvent event) {
-		event.getChannel().sendMessage("Your current Brain Cell total is: "+cellhandler.getCells(event.getMember())).queue();
+		event.getChannel().sendMessage("Your current Brain Cell total is: "+cellhandler.getCells(event.getMember().getUser().getId())).queue();
 	}
 	
 	public void targetCells(MessageReceivedEvent event, String content) {
 		Pattern pattern = Pattern.compile("\\d+");
 		Matcher matcher = pattern.matcher(content);
 		matcher.find();
-		Member target = event.getGuild().getMemberById(matcher.group());
-		Member user = event.getMember();
+		String target = matcher.group();
+		String user = event.getMember().getUser().getId();
 		if(cellhandler.targetCells(user, target)) {
-			event.getChannel().sendMessage(user.getEffectiveName()+" has targeted "+target.getEffectiveName()+"!").queue();
+			event.getChannel().sendMessage(event.getGuild().getMemberById(user).getEffectiveName()+" has targeted "+event.getGuild().getMemberById(target).getEffectiveName()+"!").queue();
 		}else {
 			event.getChannel().sendMessage("You can only target one person at a time").queue();
 		}
@@ -475,8 +471,8 @@ public class ServerManager {
 		Pattern pattern = Pattern.compile("\\d+");
 		Matcher matcher = pattern.matcher(content);
 		matcher.find();
-		Member target = event.getGuild().getMemberById(matcher.group());
-		event.getChannel().sendMessage(target.getEffectiveName()+" brain cell count is: "+cellhandler.getCells(target)).queue();
+		String target = matcher.group();
+		event.getChannel().sendMessage(event.getGuild().getMemberById(target).getEffectiveName()+" brain cell count is: "+cellhandler.getCells(matcher.group())).queue();
 	}
 	
 	public void giveCells(MessageReceivedEvent event, String content) {
@@ -484,13 +480,13 @@ public class ServerManager {
 			Pattern pattern = Pattern.compile("([0-9]+)");
 			Matcher matcher = pattern.matcher(content);
 			matcher.find();
-			Member target = event.getGuild().getMemberById(matcher.group());
+			String target = matcher.group();
 			try {
 				matcher.find();
-				cellhandler.addCells(target, Integer.parseInt(matcher.group(1)));
+				cellhandler.addCells(target, Integer.parseInt(matcher.group()));
 			}catch(Exception e) {
 			}
-			event.getChannel().sendMessage(target.getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
+			event.getChannel().sendMessage(event.getGuild().getMemberById(target).getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
 		}else {
 			noPerms(event.getChannel());
 		}
@@ -501,13 +497,13 @@ public class ServerManager {
 			Pattern pattern = Pattern.compile("([0-9]+)");
 			Matcher matcher = pattern.matcher(content);
 			matcher.find();
-			Member target = event.getGuild().getMemberById(matcher.group(0));
+			String target = matcher.group();
 			try {
 				matcher.find();
 				cellhandler.removeCells(target, Integer.parseInt(matcher.group(0)));
 			}catch(Exception e) {
 			}
-			event.getChannel().sendMessage(target.getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
+			event.getChannel().sendMessage(event.getGuild().getMemberById(target).getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
 		}else {
 			noPerms(event.getChannel());
 		}

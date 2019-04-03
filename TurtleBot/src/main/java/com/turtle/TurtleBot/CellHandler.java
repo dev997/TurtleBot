@@ -17,8 +17,9 @@ import net.dv8tion.jda.core.utils.tuple.Pair;
 public class CellHandler {
 	
 		JSONObject celldata;
-		HashMap<Member, Pair<Member, Integer>> targetlist = new HashMap<Member, Pair<Member, Integer>>();
+		HashMap<String, Pair<String, Integer>> targetlist = new HashMap<String, Pair<String, Integer>>();
 		JSONObject targetdata;
+		Guild server;
 	
 		public CellHandler(Guild server) {
 			try {
@@ -28,6 +29,7 @@ public class CellHandler {
 		}
 	
 		public void initCells(Guild server) throws IOException{
+			this.server = server;
 			// Read data from celldata
 			try {
 				FileReader reader = new FileReader("src/main/celldata.json");
@@ -52,23 +54,14 @@ public class CellHandler {
 			//saves new files
 			saveData();
 			
-			
 			List<Member> members = server.getMembers();
 			FileWriter writer = new FileWriter("src/main/celldata.json");
 			
 			for(Member member : members) {
-				if(!isMember(member)) {
-					addMember(member);
-					System.out.println(isMember(member));
+				if(!isMember(member.getUser().getId())) {
+					addMember(member.getUser().getId());
+					System.out.println(isMember(member.getUser().getId()));
 				}
-			}
-			
-			if(!celldata.containsKey("ServerTotal")) {
-				Long celltotal = new Long(0);
-				for(Object cell : celldata.values()) {
-					celltotal += (Long) cell;
-				}
-				celldata.put("ServerTotal", celltotal);
 			}
 			saveData();
 			
@@ -81,14 +74,13 @@ public class CellHandler {
 				public void run() {
 					try {
 						while(true) {
-							recountTotal();
 							
-							for(Map.Entry<Member, Pair<Member, Integer>> pair : targetlist.entrySet()) {
-								if(pair.getValue().getRight() <= 3) {
+							for(Map.Entry<String, Pair<String, Integer>> pair : targetlist.entrySet()) {
+								if(pair.getValue().getRight() < 2) {
 									addCells(pair.getKey(), 20);
 									removeCells(pair.getValue().getLeft(), 20);
 									
-									Pair<Member, Integer> newpair = Pair.of(pair.getValue().getLeft(), pair.getValue().getRight()+1);
+									Pair<String, Integer> newpair = Pair.of(pair.getValue().getLeft(), pair.getValue().getRight()+1);
 									targetlist.put(pair.getKey(), newpair);
 								}else {
 									targetlist.remove(pair.getKey());
@@ -100,19 +92,18 @@ public class CellHandler {
 							List<Member> newmembers = server.getVoiceChannelById("530263582227693568").getMembers();
 							for(Member member : newmembers) {
 								if(members.contains(member)) {
-									addCells(member, 5);
+									addCells(member.getUser().getId(), 5);
 								}
 							}
 						}
 					}catch(Exception e) {
 					}
-					recountTotal();
 				}
 			});
 			thread.start();
 		}
 		
-		public boolean addMember(Member member) throws IOException{
+		public boolean addMember(String member) throws IOException{
 			if(!isMember(member)) {
 				celldata.put(member, new Long(100));
 				try (FileWriter file = new FileWriter("src/main/celldata.json")){
@@ -124,9 +115,9 @@ public class CellHandler {
 			return false;
 		}
 			
-		public boolean addCells(Member member, int cells) throws IOException{
+		public boolean addCells(String member, int cells) throws IOException{
 			if(isMember(member)) {
-				Long cellcount = (Long) celldata.get(member.toString());
+				Long cellcount = (Long) celldata.get(member);
 				cellcount += cells;
 				celldata.put(member, new Long(cellcount));
 				saveData();
@@ -135,9 +126,9 @@ public class CellHandler {
 			return false;
 		}
 		
-		public boolean removeCells(Member member, int cells) throws IOException {
+		public boolean removeCells(String member, int cells) throws IOException {
 			if(isMember(member)) {
-				Long cellcount = (Long) celldata.get(member.toString());
+				Long cellcount = (Long) celldata.get(member);
 				cellcount -= cells;
 				celldata.put(member, new Long(cellcount));
 				saveData();
@@ -146,48 +137,29 @@ public class CellHandler {
 			return false;
 		}
 		
-		public boolean isMember(Member member) {
-			if(celldata.keySet().contains(member.toString())) {
+		public boolean isMember(String member) {
+			if(celldata.containsKey(member)) {
 				return true;
 			}
 			return false;
 		}
 		
-		public Long getServerTotal() {
-			return (Long) celldata.get("ServerTotal");
+		public Long getCells(String member) {
+			return (Long) celldata.get(member);
 		}
 		
-		public Long getCells(Member member) {
-			return (Long) celldata.get(member.toString());
-		}
-		
-		public void recountTotal() {
-			Long cellcount = new Long(0);
-			for(Object obj : celldata.keySet()) {
-				if(!obj.toString().equals("ServerTotal")) {
-					cellcount += (Long) celldata.get(obj);
-				}
-			}
-			celldata.put("ServerTotal", cellcount);
-			try {
-				saveData();
-			}catch(Exception e) {
-			}
-		}
-		
-		public boolean targetCells(Member user, Member target) {
+		public boolean targetCells(String user, String target) {
 			if(targetlist.containsKey(user)) {
 				return false;
 			}else {
-				Pair<Member, Integer> data = Pair.of(target, 0);
-				if((Long) celldata.get(user.toString()) >= 30) {
+				Pair<String, Integer> data = Pair.of(target, 0);
+				if((Long) celldata.get(user) >= 30) {
 					try {
 						removeCells(user, 30);
 						targetlist.put(user, data);
 					}catch(Exception e) {
 					}
 				}
-				recountTotal();
 				try {
 					saveData();
 				}catch(Exception e) {

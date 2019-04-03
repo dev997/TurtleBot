@@ -15,6 +15,7 @@ public class Driver extends ListenerAdapter{
 	public static JDA jda;
 	public static JLabel status;
 	public static boolean disable;
+	public static boolean init = true;
 
     public static void main( String[] args ) throws Exception
     {
@@ -60,6 +61,7 @@ public class Driver extends ListenerAdapter{
     	frame.setVisible(true);
     	startUp();
     	setListeners(jda, status);
+    	init = false;
     }
     
     @SuppressWarnings("deprecation")
@@ -76,7 +78,9 @@ public class Driver extends ListenerAdapter{
     		public void onStatusChange(StatusChangeEvent e) {
     			status.setText(jda.getStatus().toString());
     			if(jda.getStatus().toString().equals("CONNECTED")) {
-    				jda.addEventListener(new MsgListener());
+    				if(init) {
+    					jda.addEventListener(new MsgListener());
+    				}
     			}
     		}
     	});

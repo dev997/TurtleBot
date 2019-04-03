@@ -73,8 +73,6 @@ public class MsgListener extends ListenerAdapter{
 			}else {
 				event.getChannel().sendMessage("Command is currently disabled").queue();
 			}
-		}else if(content.startsWith(Driver.COMMAND_START+"braincells")) {
-			manager.getCellTotal(event);
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"cell count")) {
 			manager.getCells(event);
 		}else if(content.startsWith(Driver.COMMAND_START+"target")) {

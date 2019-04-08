@@ -450,6 +450,10 @@ public class ServerManager {
 		}
 	}
 	
+	public void stopCellThread() {
+		cellhandler.stop();
+	}
+	
 	public void getCells(MessageReceivedEvent event) {
 		event.getChannel().sendMessage("Your current Brain Cell total is: "+cellhandler.getCells(event.getMember().getUser().getId())).queue();
 	}

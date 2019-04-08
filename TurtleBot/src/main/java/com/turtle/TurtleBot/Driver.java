@@ -11,11 +11,12 @@ import net.dv8tion.jda.core.events.StatusChangeEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 public class Driver extends ListenerAdapter{
+	
 	public static String COMMAND_START = "!";
 	public static JDA jda;
 	public static JLabel status;
 	public static boolean disable;
-	public static boolean init = true;
+	public static ServerManager manager;
 
     public static void main( String[] args ) throws Exception
     {
@@ -48,6 +49,8 @@ public class Driver extends ListenerAdapter{
     	JButton restartbutton = new JButton("Restart");
     	restartbutton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
+				manager.stopCellThread();
+				manager = new ServerManager();
 				jda.shutdown();
 				startUp();
 				setListeners(jda, status);
@@ -60,8 +63,8 @@ public class Driver extends ListenerAdapter{
     	bottompanel.add(Disable_Move);
     	frame.setVisible(true);
     	startUp();
+    	manager = new ServerManager();
     	setListeners(jda, status);
-    	init = false;
     }
     
     @SuppressWarnings("deprecation")
@@ -78,9 +81,7 @@ public class Driver extends ListenerAdapter{
     		public void onStatusChange(StatusChangeEvent e) {
     			status.setText(jda.getStatus().toString());
     			if(jda.getStatus().toString().equals("CONNECTED")) {
-    				if(init) {
-    					jda.addEventListener(new MsgListener());
-    				}
+    				jda.addEventListener(new MsgListener(manager));
     			}
     		}
     	});

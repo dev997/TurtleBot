@@ -19,9 +19,13 @@ import java.util.Random;
 
 public class MsgListener extends ListenerAdapter{
 	
-	ServerManager manager = new ServerManager();
+	ServerManager manager;
 	public String quotecommand = Driver.COMMAND_START+"quote";
 	public String audiocommand = Driver.COMMAND_START+"play";
+	
+	public MsgListener(ServerManager manager) {
+		this.manager=manager;
+	}
 	
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {

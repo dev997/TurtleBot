@@ -15,13 +15,15 @@ import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.utils.tuple.Pair;
 
 public class CellHandler {
-	
+		
+		private boolean exit;
 		JSONObject celldata;
 		HashMap<String, Pair<String, Integer>> targetlist = new HashMap<String, Pair<String, Integer>>();
 		JSONObject targetdata;
 		Guild server;
 	
 		public CellHandler(Guild server) {
+			exit = false;
 			try {
 				initCells(server);
 			}catch(Exception e){
@@ -73,12 +75,13 @@ public class CellHandler {
 			Thread thread = new Thread(new Runnable() {
 				public void run() {
 					try {
-						while(true) {
+						int count=0;
+						while(!exit) {
 							
 							for(Map.Entry<String, Pair<String, Integer>> pair : targetlist.entrySet()) {
-								if(pair.getValue().getRight() < 2) {
-									addCells(pair.getKey(), 20);
-									removeCells(pair.getValue().getLeft(), 20);
+								if(pair.getValue().getRight() < 60) {
+									addCells(pair.getKey(), 1);
+									removeCells(pair.getValue().getLeft(), 1);
 									
 									Pair<String, Integer> newpair = Pair.of(pair.getValue().getLeft(), pair.getValue().getRight()+1);
 									targetlist.put(pair.getKey(), newpair);
@@ -88,19 +91,25 @@ public class CellHandler {
 							}
 							
 							List<Member> members = server.getVoiceChannelById("530263582227693568").getMembers();
-							Thread.sleep(TimeUnit.MINUTES.toMillis(30)); //Time in milliseconds
+							Thread.sleep(TimeUnit.MINUTES.toMillis(1)); //Time in milliseconds
 							List<Member> newmembers = server.getVoiceChannelById("530263582227693568").getMembers();
 							for(Member member : newmembers) {
-								if(members.contains(member)) {
+								if(members.contains(member) && count==5) {
 									addCells(member.getUser().getId(), 5);
+									count = 0;
 								}
 							}
+							count++;
 						}
 					}catch(Exception e) {
 					}
 				}
 			});
 			thread.start();
+		}
+		
+		public void stop() {
+			exit = true;
 		}
 		
 		public boolean addMember(String member) throws IOException{

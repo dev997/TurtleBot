@@ -49,8 +49,6 @@ public class Driver extends ListenerAdapter{
     	JButton restartbutton = new JButton("Restart");
     	restartbutton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				manager.stopCellThread();
-				manager = new ServerManager();
 				jda.shutdown();
 				startUp();
 				setListeners(jda, status);
@@ -63,7 +61,6 @@ public class Driver extends ListenerAdapter{
     	bottompanel.add(Disable_Move);
     	frame.setVisible(true);
     	startUp();
-    	manager = new ServerManager();
     	setListeners(jda, status);
     }
     
@@ -81,6 +78,12 @@ public class Driver extends ListenerAdapter{
     		public void onStatusChange(StatusChangeEvent e) {
     			status.setText(jda.getStatus().toString());
     			if(jda.getStatus().toString().equals("CONNECTED")) {
+    				try {
+    					manager.stopCellThread();
+    				}catch(Exception d) {
+    					d.printStackTrace();
+    				}
+    				manager = new ServerManager();
     				jda.addEventListener(new MsgListener(manager));
     			}
     		}

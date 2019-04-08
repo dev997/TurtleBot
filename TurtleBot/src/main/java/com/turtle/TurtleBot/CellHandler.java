@@ -94,7 +94,7 @@ public class CellHandler {
 							Thread.sleep(TimeUnit.MINUTES.toMillis(1)); //Time in milliseconds
 							List<Member> newmembers = server.getVoiceChannelById("530263582227693568").getMembers();
 							for(Member member : newmembers) {
-								if(members.contains(member) && count==5) {
+								if(members.contains(member) && count==30) {
 									addCells(member.getUser().getId(), 5);
 									count = 0;
 								}

@@ -87,6 +87,8 @@ public class MsgListener extends ListenerAdapter{
 			manager.giveCells(event, content);
 		}else if(content.startsWith(Driver.COMMAND_START+"take")){
 			manager.takeCells(event, content);
+		}else if(content.startsWith(Driver.COMMAND_START+"restart")) {
+			manager.restartBot(event);
 		}
 	}
 

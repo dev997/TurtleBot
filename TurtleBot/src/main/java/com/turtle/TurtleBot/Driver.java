@@ -50,9 +50,7 @@ public class Driver extends ListenerAdapter{
     	JButton restartbutton = new JButton("Restart");
     	restartbutton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				jda.shutdown();
-				startUp();
-				setListeners(jda, status);
+				restart();
 			}
     	});
     	
@@ -96,5 +94,11 @@ public class Driver extends ListenerAdapter{
     			}
     		}
     	});
+    }
+    
+    public static void restart() {
+    	jda.shutdownNow();
+    	startUp();
+    	setListeners(jda, status);
     }
 }

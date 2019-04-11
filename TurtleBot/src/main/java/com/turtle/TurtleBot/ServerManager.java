@@ -513,4 +513,10 @@ public class ServerManager {
 		}
 	}
 	
+	public void restartBot(MessageReceivedEvent event) {
+		if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+			Driver.restart();
+		}
+	}
+	
 }

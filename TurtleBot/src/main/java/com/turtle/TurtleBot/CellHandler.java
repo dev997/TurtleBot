@@ -17,9 +17,8 @@ import net.dv8tion.jda.core.utils.tuple.Pair;
 public class CellHandler {
 		
 		private boolean exit;
-		JSONObject celldata;
-		HashMap<String, Pair<String, Integer>> targetlist = new HashMap<String, Pair<String, Integer>>();
-		JSONObject targetdata;
+		HashMap<String, Integer> celldata;
+		HashMap<String, Pair<String, Integer>> targetlist;
 		Guild server;
 	
 		public CellHandler(Guild server) {
@@ -34,23 +33,28 @@ public class CellHandler {
 			this.server = server;
 			// Read data from celldata
 			try {
-				FileReader reader = new FileReader("src/main/celldata.json");
-				JSONParser parser = new JSONParser();
-				celldata = (JSONObject) parser.parse(reader);
+				FileInputStream file = new FileInputStream("src/main/celldata.ser");
+	            ObjectInputStream in = new ObjectInputStream(file);
+	            
+	            celldata = (HashMap<String, Integer>) in.readObject();
+	            in.close();
+	            file.close();
 			}catch(Exception e) {
 				if(celldata==null) {
-					celldata = new JSONObject();
+					celldata = new HashMap<String, Integer>();
 				}
 			}
 			// Read data from targetdata
 			try {
-				FileReader reader = new FileReader("src/main/targetdata.json");
-				JSONParser parser = new JSONParser();
-				targetdata = (JSONObject) parser.parse(reader);
-				targetlist = (HashMap) targetdata.get("Targets");
+				FileInputStream file = new FileInputStream("src/main/targetdata.ser"); 
+	            ObjectInputStream in = new ObjectInputStream(file);
+				
+				targetlist = (HashMap<String, Pair<String, Integer>>) in.readObject();
+				in.close();
+				file.close();
 			}catch(Exception e) {
-				if(targetdata==null) {
-					targetdata = new JSONObject();
+				if(targetlist==null) {
+					targetlist = new HashMap<String, Pair<String, Integer>>();
 				}
 			}
 			//saves new files
@@ -77,24 +81,29 @@ public class CellHandler {
 					try {
 						int count=0;
 						while(!exit) {
-							
+							saveData();
+							ArrayList<String> removeset = new ArrayList<String>();
 							for(Map.Entry<String, Pair<String, Integer>> pair : targetlist.entrySet()) {
-								if(pair.getValue().getRight() < 60) {
-									addCells(pair.getKey(), 1);
+								if(pair.getValue().getRight() < 30) {
+									addCells(pair.getKey(), 2);
 									removeCells(pair.getValue().getLeft(), 1);
 									
 									Pair<String, Integer> newpair = Pair.of(pair.getValue().getLeft(), pair.getValue().getRight()+1);
 									targetlist.put(pair.getKey(), newpair);
 								}else {
-									targetlist.remove(pair.getKey());
+									removeset.add(pair.getKey());
 								}
 							}
+							for(String obj : removeset) {
+								targetlist.remove(obj);
+							}
 							
+							saveData();
 							List<Member> members = server.getVoiceChannelById("530263582227693568").getMembers();
-							Thread.sleep(TimeUnit.MINUTES.toMillis(1)); //Time in milliseconds
+							Thread.sleep(TimeUnit.MINUTES.toMillis(2)); //Time in milliseconds
 							List<Member> newmembers = server.getVoiceChannelById("530263582227693568").getMembers();
 							for(Member member : newmembers) {
-								if(members.contains(member) && count==30) {
+								if(members.contains(member) && count==15) {
 									addCells(member.getUser().getId(), 5);
 									count = 0;
 								}
@@ -114,11 +123,7 @@ public class CellHandler {
 		
 		public boolean addMember(String member) throws IOException{
 			if(!isMember(member)) {
-				celldata.put(member, new Long(100));
-				try (FileWriter file = new FileWriter("src/main/celldata.json")){
-					file.write(celldata.toJSONString());
-					file.flush();
-				}
+				celldata.put(member, 100);
 				return true;
 			}
 			return false;
@@ -126,10 +131,9 @@ public class CellHandler {
 			
 		public boolean addCells(String member, int cells) throws IOException{
 			if(isMember(member)) {
-				Long cellcount = (Long) celldata.get(member);
+				int cellcount = (Integer) celldata.get(member);
 				cellcount += cells;
-				celldata.put(member, new Long(cellcount));
-				saveData();
+				celldata.put(member, cellcount);
 				return true;
 			}
 			return false;
@@ -137,9 +141,9 @@ public class CellHandler {
 		
 		public boolean removeCells(String member, int cells) throws IOException {
 			if(isMember(member)) {
-				Long cellcount = (Long) celldata.get(member);
+				int cellcount = celldata.get(member);
 				cellcount -= cells;
-				celldata.put(member, new Long(cellcount));
+				celldata.put(member, cellcount);
 				saveData();
 				return true;
 			}
@@ -153,8 +157,8 @@ public class CellHandler {
 			return false;
 		}
 		
-		public Long getCells(String member) {
-			return (Long) celldata.get(member);
+		public int getCells(String member) {
+			return celldata.get(member);
 		}
 		
 		public boolean targetCells(String user, String target) {
@@ -162,7 +166,7 @@ public class CellHandler {
 				return false;
 			}else {
 				Pair<String, Integer> data = Pair.of(target, 0);
-				if((Long) celldata.get(user) >= 30) {
+				if(celldata.get(user) >= 30) {
 					try {
 						removeCells(user, 30);
 						targetlist.put(user, data);
@@ -178,15 +182,19 @@ public class CellHandler {
 		}
 		
 		public void saveData() throws IOException{
-			targetdata.put("Targets", targetlist);
-			try (FileWriter file = new FileWriter("src/main/targetdata.json")){
-				file.write(targetdata.toJSONString());
-				file.flush();
-			}
-			try (FileWriter file = new FileWriter("src/main/celldata.json")){
-				file.write(celldata.toJSONString());
-				file.flush();
-			}
+			FileOutputStream file = new FileOutputStream("src/main/targetdata.ser");
+			ObjectOutputStream out = new ObjectOutputStream(file);
+			
+			out.writeObject(targetlist);
+			out.close();
+			file.close();
+			
+			file = new FileOutputStream("src/main/celldata.ser");
+			out = new ObjectOutputStream(file);
+			
+			out.writeObject(celldata);
+			out.close();
+			file.close();
 		}
 		
 }

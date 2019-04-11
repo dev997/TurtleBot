@@ -3,6 +3,7 @@ package com.turtle.TurtleBot;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -74,6 +75,13 @@ public class Driver extends ListenerAdapter{
     }
     
     public static void setListeners(JDA jda, JLabel status) {
+    	ArrayList<Object> removeset = new ArrayList<Object>();
+    	for(Object al : jda.getRegisteredListeners()) {
+    		removeset.add(al);
+    	}
+    	for(Object obj : removeset) {
+    		jda.removeEventListener(obj);
+    	}
     	jda.addEventListener(new ListenerAdapter() {
     		public void onStatusChange(StatusChangeEvent e) {
     			status.setText(jda.getStatus().toString());

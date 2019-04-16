@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import javax.swing.*;
 
@@ -90,6 +91,12 @@ public class Driver extends ListenerAdapter{
     					d.printStackTrace();
     				}
     				manager = new ServerManager();
+    				
+    				for(Object al : jda.getRegisteredListeners()) {
+    					if(al instanceof MsgListener) {
+    						jda.removeEventListener(al);
+    					}
+    				}
     				jda.addEventListener(new MsgListener(manager));
     			}
     		}

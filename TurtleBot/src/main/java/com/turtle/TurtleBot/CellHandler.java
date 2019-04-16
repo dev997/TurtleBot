@@ -61,7 +61,7 @@ public class CellHandler {
 			saveData();
 			
 			List<Member> members = server.getMembers();
-			FileWriter writer = new FileWriter("src/main/celldata.json");
+			FileWriter writer = new FileWriter("src/main/celldata.ser");
 			
 			for(Member member : members) {
 				if(!isMember(member.getUser().getId())) {

@@ -7,10 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.json.simple.*;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.utils.tuple.Pair;
 
@@ -28,7 +24,8 @@ public class CellHandler {
 			}catch(Exception e){
 			}
 		}
-	
+		
+		@SuppressWarnings("unchecked")
 		public void initCells(Guild server) throws IOException{
 			this.server = server;
 			// Read data from celldata
@@ -40,6 +37,7 @@ public class CellHandler {
 	            in.close();
 	            file.close();
 			}catch(Exception e) {
+				e.printStackTrace();
 				if(celldata==null) {
 					celldata = new HashMap<String, Integer>();
 				}
@@ -53,6 +51,7 @@ public class CellHandler {
 				in.close();
 				file.close();
 			}catch(Exception e) {
+				e.printStackTrace();
 				if(targetlist==null) {
 					targetlist = new HashMap<String, Pair<String, Integer>>();
 				}
@@ -61,7 +60,6 @@ public class CellHandler {
 			saveData();
 			
 			List<Member> members = server.getMembers();
-			FileWriter writer = new FileWriter("src/main/celldata.ser");
 			
 			for(Member member : members) {
 				if(!isMember(member.getUser().getId())) {

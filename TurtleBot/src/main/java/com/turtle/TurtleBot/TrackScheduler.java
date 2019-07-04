@@ -2,6 +2,7 @@ package com.turtle.TurtleBot;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
@@ -47,6 +48,8 @@ public class TrackScheduler extends AudioEventAdapter {
   
   public void clearQueue() {
 	  queue.clear();
+	  Logger logger = Logger.getInstance();
+	  logger.log("Queue Cleared");
   }
   
   public ArrayList<AudioTrackInfo> getQueue() {
@@ -75,9 +78,16 @@ public class TrackScheduler extends AudioEventAdapter {
 			
 		}
 		if(queue.isEmpty()) {
-			player.stopTrack();
+			try {
+				player.stopTrack();
+			}catch(Exception e) {
+				Logger logger = Logger.getInstance();
+				logger.log("New Queue loaded: "+e.getMessage());
+			}
 		}
 		player.startTrack(queue.poll(), false);
+		Logger logger = Logger.getInstance();
+		logger.log("Next Song started: "+player.getPlayingTrack().getInfo().title);
 	}
   }
 
@@ -86,12 +96,23 @@ public class TrackScheduler extends AudioEventAdapter {
     // Only start the next track if the end reason is suitable for it (FINISHED or LOAD_FAILED)
     if (endReason.mayStartNext) {
       nextTrack();
+    }else {
+    	Logger logger = Logger.getInstance();
+    	logger.log("Track end reason: "+endReason.toString());
     }
   }
   
   @Override
   public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs) {
     System.out.println("Track Stuck");
+    Logger logger = Logger.getInstance();
+	logger.log("Track Stuck");
+  }
+  
+  @Override
+  public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+	  Logger logger = Logger.getInstance();
+	  logger.log("Track exception: "+exception.getMessage());
   }
   
   public boolean setRepeat() {

@@ -1,14 +1,18 @@
 package com.turtle.TurtleBot;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -94,7 +98,9 @@ public class ServerManager {
 		AudioManager audiomanager = guild.getAudioManager();
 		for(MusicHandler handler : musichandlerlist) {
 			if(handler.getServer() == guild) {
-				handler.setManager(audiomanager);
+				if(!handler.hasManager()) {
+					handler.setManager(audiomanager);
+				}
 				musicHandler = handler;
 				hashandler = true;
 				break;
@@ -102,6 +108,7 @@ public class ServerManager {
 		}
 		if(!hashandler) {
 			musicHandler = new MusicHandler(event.getGuild());
+			musicHandler.setManager(audiomanager);
 			musichandlerlist.add(musicHandler);
 		}
 		
@@ -127,6 +134,7 @@ public class ServerManager {
 			VoiceChannel voicechannel = member.getVoiceState().getChannel();
 			musicHandler.playTrack(content.substring(6));
 			musicHandler.joinChannel(voicechannel);
+			
 		//for selection
 		}else if(isSelection) {
 			AudioTrack track = results.get(index-1);
@@ -140,23 +148,22 @@ public class ServerManager {
 				e.printStackTrace();
 			}
 			addedtrack = track;
+			
 		//for searching
 		}else{
 			List<AudioTrack> results = musicHandler.searchItem(searchToken);
 			if(!results.isEmpty()) {
 				this.results = results;
-				StringBuilder sb = new StringBuilder();
+				ArrayList<String> sb = new ArrayList<String>();
 				int i=1;
 				for(AudioTrack song : results) {
-					sb.append(i+". ");
-					sb.append(song.getInfo().title);
-					sb.append(buildTimeString(event, song.getInfo(), false));
-					sb.append("\n");
+					sb.add(i+". "+song.getInfo().title+" "+buildTimeString(event, song.getInfo(), false));
 					i++;
 				}
-				event.getChannel().sendMessage(sb.toString()).queue();
+				event.getChannel().sendMessage(buildEmbed("Results", sb)).queue();
 			}
 		}
+		
 		if(addedtrack!=null) {
 			AudioTrackInfo info = addedtrack.getInfo();
 			event.getChannel().sendMessage("Added to queue: "+info.title).queue();
@@ -178,21 +185,17 @@ public class ServerManager {
 			channel.sendMessage("Queue is empty").queue();
 			return;
 		}
-		StringBuilder sb = new StringBuilder();
+		ArrayList<String> sb = new ArrayList<String>();
 		for(int i=1; i<=queue.size(); i++) {
-			sb.append(i+". ");
-			sb.append(queue.get(i-1).title);
-			sb.append(buildTimeString(event, queue.get(i-1), false));
-			sb.append("\n");
+			sb.add(i+". "+queue.get(i-1).title+buildTimeString(event, queue.get(i-1), false));
 			if(i>=10) {
 				int size = queue.size()-10;
-				sb.append("--"+String.valueOf(size)+" more--");
+				sb.add("--"+String.valueOf(size)+" more--");
 				break;
 			}
-			i++;
 		}
 		if(!queue.isEmpty()) {
-			channel.sendMessage(sb.toString()).queue();
+			channel.sendMessage(buildEmbed("Queue", sb)).queue();
 		}
 	}
 	
@@ -260,8 +263,10 @@ public class ServerManager {
 		}catch(Exception e) {
 			title = null;
 		}
+		ArrayList<String> returnstring = new ArrayList<String>();
 		if(title!=null && title!=" " && title!="") {
-			event.getChannel().sendMessage("Currently Playing: "+title+buildTimeString(event, track.getInfo(), true)).queue();
+			returnstring.add(title+buildTimeString(event, track.getInfo(), true));
+			event.getChannel().sendMessage(buildEmbed("Now Playing", returnstring)).queue();
 		}else {
 			event.getChannel().sendMessage("Nothing is playing").queue();
 		}
@@ -306,7 +311,6 @@ public class ServerManager {
             					Driver.COMMAND_START+"skip - skips the currently playing song\n"+
             					Driver.COMMAND_START+"earrape - toggles earrape mode").queue();
         //});
-		
 	}
 	
 	public void changeVolume(String content, MessageReceivedEvent event) {
@@ -386,7 +390,7 @@ public class ServerManager {
 		
 	}
 	
-	public void NoPerms(MessageChannel channel) {
+	public void noPerms(MessageChannel channel) {
 		channel.sendMessage(NO_PERMISSION).queue();
 	}
 	
@@ -404,21 +408,6 @@ public class ServerManager {
 		}
 		
 		event.getChannel().sendMessage(musicHandler.setRepeat()).queue();
-	}
-	
-	public void mrBones(MessageReceivedEvent event) {
-		
-		MusicHandler musicHandler = null;
-		for(MusicHandler handler : musichandlerlist) {
-			if(handler.getServer() == event.getGuild()) {
-				musicHandler = handler;
-			}
-		}
-		
-		Member member = event.getMember();
-		VoiceChannel voicechannel = member.getVoiceState().getChannel();
-		musicHandler.joinChannel(voicechannel);
-		musicHandler.playTrack("https://youtu.be/_MkUCE8cMUY");
 	}
 	
 	public void moveMember(MessageReceivedEvent event, String content) {
@@ -464,12 +453,91 @@ public class ServerManager {
 		}
 	}
 	
-	public void getCellTotal(MessageReceivedEvent event) {
-		event.getChannel().sendMessage("Current Brain Cell total is: "+cellhandler.getServerTotal()).queue();
+	public void stopCellThread() {
+		cellhandler.stop();
 	}
 	
 	public void getCells(MessageReceivedEvent event) {
-		event.getChannel().sendMessage("Your current Brain Cell total is: "+cellhandler.getCells(event.getMember())).queue();
+		event.getChannel().sendMessage("Your current Brain Cell total is: "+cellhandler.getCells(event.getMember().getUser().getId())).queue();
+	}
+	
+	public void targetCells(MessageReceivedEvent event, String content) {
+		Pattern pattern = Pattern.compile("\\d+");
+		Matcher matcher = pattern.matcher(content);
+		matcher.find();
+		String target = matcher.group();
+		String user = event.getMember().getUser().getId();
+		if(cellhandler.targetCells(user, target)) {
+			event.getChannel().sendMessage(event.getGuild().getMemberById(user).getEffectiveName()+" has targeted "+event.getGuild().getMemberById(target).getEffectiveName()+"!").queue();
+		}else {
+			event.getChannel().sendMessage("You can only target one person at a time").queue();
+		}
+	}
+	
+	public void checkCells(MessageReceivedEvent event, String content) {
+		Pattern pattern = Pattern.compile("\\d+");
+		Matcher matcher = pattern.matcher(content);
+		matcher.find();
+		String target = matcher.group();
+		event.getChannel().sendMessage(event.getGuild().getMemberById(target).getEffectiveName()+" brain cell count is: "+cellhandler.getCells(matcher.group())).queue();
+	}
+	
+	public void giveCells(MessageReceivedEvent event, String content) {
+		if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+			Pattern pattern = Pattern.compile("([0-9]+)");
+			Matcher matcher = pattern.matcher(content);
+			matcher.find();
+			String target = matcher.group();
+			try {
+				matcher.find();
+				cellhandler.addCells(target, Integer.parseInt(matcher.group()));
+			}catch(Exception e) {
+			}
+			event.getChannel().sendMessage(event.getGuild().getMemberById(target).getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
+		}else {
+			noPerms(event.getChannel());
+		}
+	}
+	
+	public void takeCells(MessageReceivedEvent event, String content) {
+		
+		if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+			Pattern pattern = Pattern.compile("([0-9]+)");
+			Matcher matcher = pattern.matcher(content);
+			matcher.find();
+			String target = matcher.group();
+			try {
+				matcher.find();
+				cellhandler.removeCells(target, Integer.parseInt(matcher.group(0)));
+			}catch(Exception e) {
+			}
+			event.getChannel().sendMessage(event.getGuild().getMemberById(target).getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
+		}else {
+			noPerms(event.getChannel());
+		}
+
+	}
+	
+	public void restartBot(MessageReceivedEvent event) {
+		if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+			Driver.restart();
+		}
+	}
+	
+	public MessageEmbed buildEmbed(String title, ArrayList<String> messages) {
+		
+		EmbedBuilder eb = new EmbedBuilder();
+		
+		if(title!=null) {
+			eb.setTitle(title);
+		}
+		
+		eb.setColor(Color.green);
+		for(String line : messages) {
+			eb.addField("", line, false);
+		}
+		
+		return eb.build();
 	}
 	
 }

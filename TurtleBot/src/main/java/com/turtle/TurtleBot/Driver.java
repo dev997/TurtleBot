@@ -68,6 +68,8 @@ public class Driver extends ListenerAdapter{
     	try {
     		jda = new JDABuilder(AccountType.BOT).setToken("NDc3MzYxMjIyNzkwOTM4NjI0.DlzmRA.hf_szqxGc_6xHeNTmevBAGOdq2E").buildAsync();
     	}catch(Exception e) {
+    		Logger logger = Logger.getInstance();
+    		logger.log(e);
     		e.printStackTrace();
     	}
     }
@@ -100,9 +102,13 @@ public class Driver extends ListenerAdapter{
     			}
     		}
     	});
+    	Logger logger = Logger.getInstance();
+    	logger.log("Set Listeners");
     }
     
     public static void restart() {
+    	Logger logger = Logger.getInstance();
+    	logger.log("Restarting");
     	jda.shutdownNow();
     	startUp();
     	setListeners(jda, status);

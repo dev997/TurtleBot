@@ -98,7 +98,9 @@ public class ServerManager {
 		AudioManager audiomanager = guild.getAudioManager();
 		for(MusicHandler handler : musichandlerlist) {
 			if(handler.getServer() == guild) {
-				handler.setManager(audiomanager);
+				if(!handler.hasManager()) {
+					handler.setManager(audiomanager);
+				}
 				musicHandler = handler;
 				hashandler = true;
 				break;
@@ -106,6 +108,7 @@ public class ServerManager {
 		}
 		if(!hashandler) {
 			musicHandler = new MusicHandler(event.getGuild());
+			musicHandler.setManager(audiomanager);
 			musichandlerlist.add(musicHandler);
 		}
 		

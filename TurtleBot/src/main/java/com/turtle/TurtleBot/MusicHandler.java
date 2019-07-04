@@ -26,6 +26,7 @@ public class MusicHandler {
 	public List<AudioTrack> results;
 	public Timer timer;
 	private Guild server;
+	private Logger logger = Logger.getInstance();
 	
 	public MusicHandler(Guild server) {
 		this.server=server;
@@ -43,7 +44,7 @@ public class MusicHandler {
 		timer = new Timer(true);
     	TimerTask timertask = new TimerTask() {
     		public void run() {
-    			if(getPlayer().getPlayingTrack()==null && audiomanager!=null) {
+    			if(getPlayer().getPlayingTrack()==null) {
     				leaveChannel();
     			}
     		}
@@ -131,15 +132,15 @@ public class MusicHandler {
 		try {
 			trackScheduler.updateRepeatTrack(trackScheduler.getNext());
 		}catch(Exception e) {
-			
+			logger.log(e);
 		}
 		try {
 			trackScheduler.nextTrack();
 			return true;
 		}catch(Exception e) {
+			logger.log(e);
 			return false;
 		}
-		
 	}
 	
 	public List<AudioTrack> searchItem(String query) {
@@ -151,6 +152,7 @@ public class MusicHandler {
 			playTrack(query);
 			return results;
 		}catch(Exception e) {
+			logger.log("Searching for track: "+query);
 			AudioItem result = ytsearchProvider.loadSearchResult(query);
 			if(result instanceof BasicAudioPlaylist) {
 				results = ((BasicAudioPlaylist)result).getTracks();
@@ -162,6 +164,7 @@ public class MusicHandler {
 				}
 				return finalresults;
 			}catch(Exception d) {
+				logger.log(d.getMessage());
 				return finalresults;
 			}
 		}
@@ -206,4 +209,12 @@ public class MusicHandler {
 	public Guild getServer() {
 		return server;
 	}
+	
+	public boolean hasManager() {
+		if(audiomanager!=null) {
+			return true;
+		}
+		return false;
+	}
+	
 }

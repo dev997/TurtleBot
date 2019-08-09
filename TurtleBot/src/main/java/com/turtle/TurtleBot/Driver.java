@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-import net.dv8tion.jda.core.*;
-import net.dv8tion.jda.core.events.StatusChangeEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.*;
+import net.dv8tion.jda.api.events.StatusChangeEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class Driver extends ListenerAdapter{
 	
@@ -63,10 +63,9 @@ public class Driver extends ListenerAdapter{
     	setListeners(jda, status);
     }
     
-    @SuppressWarnings("deprecation")
-	public static void startUp() {
+    public static void startUp() {
     	try {
-    		jda = new JDABuilder(AccountType.BOT).setToken("NDc3MzYxMjIyNzkwOTM4NjI0.DlzmRA.hf_szqxGc_6xHeNTmevBAGOdq2E").buildAsync();
+    		jda = new JDABuilder(AccountType.BOT).setToken("NDc3MzYxMjIyNzkwOTM4NjI0.DlzmRA.hf_szqxGc_6xHeNTmevBAGOdq2E").build();
     	}catch(Exception e) {
     		Logger logger = Logger.getInstance();
     		logger.log(e);

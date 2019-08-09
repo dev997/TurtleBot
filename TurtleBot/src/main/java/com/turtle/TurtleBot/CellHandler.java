@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.utils.tuple.Pair;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.internal.utils.tuple.Pair;
 
 public class CellHandler {
 		

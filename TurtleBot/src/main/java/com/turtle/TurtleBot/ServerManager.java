@@ -12,12 +12,11 @@ import java.util.regex.Pattern;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.managers.AudioManager;
-import net.dv8tion.jda.core.managers.GuildController;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.managers.*;
 
 public class ServerManager {
 	
@@ -416,11 +415,10 @@ public class ServerManager {
 			return;
 		}
 		List<VoiceChannel> channels = guild.getVoiceChannels();
-		GuildController control = new GuildController(guild);
 		String name = content.substring(6);
 		List<Member> members = guild.getMembersByEffectiveName(name, true);
 		for(int i=0; i<10; i++) {
-			control.moveVoiceMember(members.get(0), channels.get(new Random().nextInt(6))).submit();
+			guild.moveVoiceMember(members.get(0), channels.get(new Random().nextInt(6))).submit();
 			try {
 				TimeUnit.SECONDS.sleep(1);
 			}catch(Exception e) {
@@ -435,7 +433,6 @@ public class ServerManager {
 			return;
 		}
 		List<VoiceChannel> channels = guild.getVoiceChannels();
-		GuildController control = new GuildController(guild);
 		List<Member> members = event.getMember().getVoiceState().getChannel().getMembers();
 		for(int i=0; i<1; i++) {
 			for(Member member : members) {
@@ -443,7 +440,7 @@ public class ServerManager {
 				do {
 					channel = channels.get(new Random().nextInt(6));
 				}while(channel==member.getVoiceState().getChannel());
-				control.moveVoiceMember(member, channel).submit();
+				guild.moveVoiceMember(member, channel).submit();
 				try {
 					TimeUnit.MILLISECONDS.sleep(250);
 				}catch(Exception e) {

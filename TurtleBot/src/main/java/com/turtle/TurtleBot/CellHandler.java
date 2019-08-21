@@ -37,7 +37,7 @@ public class CellHandler {
 	            in.close();
 	            file.close();
 			}catch(Exception e) {
-				e.printStackTrace();
+				Logger.getInstance().log(e);
 				if(celldata==null) {
 					celldata = new HashMap<String, Integer>();
 				}

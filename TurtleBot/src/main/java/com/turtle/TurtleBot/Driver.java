@@ -28,24 +28,11 @@ public class Driver extends ListenerAdapter{
     	frame.add(mainpanel, BorderLayout.CENTER);
     	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	frame.setTitle("Turtle Bot");
-    	frame.setSize(400,200);
+    	frame.setSize(300,100);
     	frame.add(bottompanel, BorderLayout.SOUTH);
     	
     	status = new JLabel();
     	disable = false;
-    	JLabel disable_text = new JLabel("Enabled");
-    	
-    	JButton Disable_Move = new JButton("Toggle Move Command");
-    	Disable_Move.addActionListener(new ActionListener() {
-    		public void actionPerformed(ActionEvent e) {
-    			disable = !disable;
-    			if(disable) {
-    				disable_text.setText("Disabled");
-    			}else {
-    				disable_text.setText("Enabled");
-    			}
-    		}
-    	});
     	
     	JButton restartbutton = new JButton("Restart");
     	restartbutton.addActionListener(new ActionListener(){
@@ -56,8 +43,6 @@ public class Driver extends ListenerAdapter{
     	
     	mainpanel.add(status);
     	mainpanel.add(restartbutton);
-    	bottompanel.add(disable_text);
-    	bottompanel.add(Disable_Move);
     	frame.setVisible(true);
     	startUp();
     	setListeners(jda, status);
@@ -88,7 +73,7 @@ public class Driver extends ListenerAdapter{
     				try {
     					manager.stopCellThread();
     				}catch(Exception d) {
-    					d.printStackTrace();
+    					//d.printStackTrace();
     				}
     				manager = new ServerManager();
     				

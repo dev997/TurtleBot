@@ -52,12 +52,6 @@ public class MsgListener extends ListenerAdapter{
 			manager.changeVolume(content, event);
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"repeat")) {
 			manager.toggleRepeat(content, event);
-		}else if(content.startsWith(Driver.COMMAND_START+"move")) {
-			if(!Driver.disable) {
-				manager.moveMember(event, content);
-			}else {
-				event.getChannel().sendMessage("Command is currently disabled").queue();
-			}
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"cell count")) {
 			manager.getCells(event);
 		}else if(content.startsWith(Driver.COMMAND_START+"target")) {

@@ -242,6 +242,7 @@ public class ServerManager {
 				musicHandler = handler;
 			}
 		}
+		Logger.getInstance().log("Leaving voice: "+event.getMessage());
 		
 		musicHandler.leaveChannel();
 	}

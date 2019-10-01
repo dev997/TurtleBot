@@ -50,7 +50,7 @@ public class Driver extends ListenerAdapter{
     
     public static void startUp() {
     	try {
-    		jda = new JDABuilder(AccountType.BOT).setToken("NDc3MzYxMjIyNzkwOTM4NjI0.DlzmRA.hf_szqxGc_6xHeNTmevBAGOdq2E").build();
+    		jda = new JDABuilder(AccountType.BOT).setToken("").build();
     	}catch(Exception e) {
     		Logger logger = Logger.getInstance();
     		logger.log(e);

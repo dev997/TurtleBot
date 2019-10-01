@@ -6,18 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.managers.AudioManager;
-import net.dv8tion.jda.core.managers.GuildController;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.managers.*;
 
 public class ServerManager {
 	
@@ -26,7 +23,6 @@ public class ServerManager {
 	List<AudioTrack> results = new ArrayList<AudioTrack>();
 	public QuoteHandler quotehandler = new QuoteHandler();
 	private String NO_PERMISSION = "You do not have permission to use this command!";
-	private CellHandler cellhandler = new CellHandler(Driver.jda.getGuilds().get(1));
 	
 	public ServerManager() {
 		servers = Driver.jda.getGuilds();
@@ -161,12 +157,14 @@ public class ServerManager {
 					i++;
 				}
 				event.getChannel().sendMessage(buildEmbed("Results", sb)).queue();
+			}else {
+				event.getChannel().sendMessage("> No results for: "+searchToken).queue();
 			}
 		}
 		
 		if(addedtrack!=null) {
 			AudioTrackInfo info = addedtrack.getInfo();
-			event.getChannel().sendMessage("Added to queue: "+info.title).queue();
+			event.getChannel().sendMessage("> Added to queue: "+info.title).queue();
 		}
 	}
 	
@@ -243,6 +241,7 @@ public class ServerManager {
 				musicHandler = handler;
 			}
 		}
+		Logger.getInstance().log("Leaving voice: "+event.getMessage());
 		
 		musicHandler.leaveChannel();
 	}
@@ -416,11 +415,10 @@ public class ServerManager {
 			return;
 		}
 		List<VoiceChannel> channels = guild.getVoiceChannels();
-		GuildController control = new GuildController(guild);
 		String name = content.substring(6);
 		List<Member> members = guild.getMembersByEffectiveName(name, true);
 		for(int i=0; i<10; i++) {
-			control.moveVoiceMember(members.get(0), channels.get(new Random().nextInt(6))).submit();
+			guild.moveVoiceMember(members.get(0), channels.get(new Random().nextInt(6))).submit();
 			try {
 				TimeUnit.SECONDS.sleep(1);
 			}catch(Exception e) {
@@ -435,7 +433,6 @@ public class ServerManager {
 			return;
 		}
 		List<VoiceChannel> channels = guild.getVoiceChannels();
-		GuildController control = new GuildController(guild);
 		List<Member> members = event.getMember().getVoiceState().getChannel().getMembers();
 		for(int i=0; i<1; i++) {
 			for(Member member : members) {
@@ -443,7 +440,7 @@ public class ServerManager {
 				do {
 					channel = channels.get(new Random().nextInt(6));
 				}while(channel==member.getVoiceState().getChannel());
-				control.moveVoiceMember(member, channel).submit();
+				guild.moveVoiceMember(member, channel).submit();
 				try {
 					TimeUnit.MILLISECONDS.sleep(250);
 				}catch(Exception e) {
@@ -451,71 +448,6 @@ public class ServerManager {
 				}
 			}
 		}
-	}
-	
-	public void stopCellThread() {
-		cellhandler.stop();
-	}
-	
-	public void getCells(MessageReceivedEvent event) {
-		event.getChannel().sendMessage("Your current Brain Cell total is: "+cellhandler.getCells(event.getMember().getUser().getId())).queue();
-	}
-	
-	public void targetCells(MessageReceivedEvent event, String content) {
-		Pattern pattern = Pattern.compile("\\d+");
-		Matcher matcher = pattern.matcher(content);
-		matcher.find();
-		String target = matcher.group();
-		String user = event.getMember().getUser().getId();
-		if(cellhandler.targetCells(user, target)) {
-			event.getChannel().sendMessage(event.getGuild().getMemberById(user).getEffectiveName()+" has targeted "+event.getGuild().getMemberById(target).getEffectiveName()+"!").queue();
-		}else {
-			event.getChannel().sendMessage("You can only target one person at a time").queue();
-		}
-	}
-	
-	public void checkCells(MessageReceivedEvent event, String content) {
-		Pattern pattern = Pattern.compile("\\d+");
-		Matcher matcher = pattern.matcher(content);
-		matcher.find();
-		String target = matcher.group();
-		event.getChannel().sendMessage(event.getGuild().getMemberById(target).getEffectiveName()+" brain cell count is: "+cellhandler.getCells(matcher.group())).queue();
-	}
-	
-	public void giveCells(MessageReceivedEvent event, String content) {
-		if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-			Pattern pattern = Pattern.compile("([0-9]+)");
-			Matcher matcher = pattern.matcher(content);
-			matcher.find();
-			String target = matcher.group();
-			try {
-				matcher.find();
-				cellhandler.addCells(target, Integer.parseInt(matcher.group()));
-			}catch(Exception e) {
-			}
-			event.getChannel().sendMessage(event.getGuild().getMemberById(target).getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
-		}else {
-			noPerms(event.getChannel());
-		}
-	}
-	
-	public void takeCells(MessageReceivedEvent event, String content) {
-		
-		if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-			Pattern pattern = Pattern.compile("([0-9]+)");
-			Matcher matcher = pattern.matcher(content);
-			matcher.find();
-			String target = matcher.group();
-			try {
-				matcher.find();
-				cellhandler.removeCells(target, Integer.parseInt(matcher.group(0)));
-			}catch(Exception e) {
-			}
-			event.getChannel().sendMessage(event.getGuild().getMemberById(target).getEffectiveName()+" new cell count is: "+cellhandler.getCells(target)).queue();
-		}else {
-			noPerms(event.getChannel());
-		}
-
 	}
 	
 	public void restartBot(MessageReceivedEvent event) {

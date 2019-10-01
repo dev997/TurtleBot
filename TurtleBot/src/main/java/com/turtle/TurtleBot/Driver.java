@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-import net.dv8tion.jda.core.*;
-import net.dv8tion.jda.core.events.StatusChangeEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.*;
+import net.dv8tion.jda.api.events.StatusChangeEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class Driver extends ListenerAdapter{
 	
@@ -28,24 +28,11 @@ public class Driver extends ListenerAdapter{
     	frame.add(mainpanel, BorderLayout.CENTER);
     	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	frame.setTitle("Turtle Bot");
-    	frame.setSize(400,200);
+    	frame.setSize(300,100);
     	frame.add(bottompanel, BorderLayout.SOUTH);
     	
     	status = new JLabel();
     	disable = false;
-    	JLabel disable_text = new JLabel("Enabled");
-    	
-    	JButton Disable_Move = new JButton("Toggle Move Command");
-    	Disable_Move.addActionListener(new ActionListener() {
-    		public void actionPerformed(ActionEvent e) {
-    			disable = !disable;
-    			if(disable) {
-    				disable_text.setText("Disabled");
-    			}else {
-    				disable_text.setText("Enabled");
-    			}
-    		}
-    	});
     	
     	JButton restartbutton = new JButton("Restart");
     	restartbutton.addActionListener(new ActionListener(){
@@ -56,17 +43,14 @@ public class Driver extends ListenerAdapter{
     	
     	mainpanel.add(status);
     	mainpanel.add(restartbutton);
-    	bottompanel.add(disable_text);
-    	bottompanel.add(Disable_Move);
     	frame.setVisible(true);
     	startUp();
     	setListeners(jda, status);
     }
     
-    @SuppressWarnings("deprecation")
-	public static void startUp() {
+    public static void startUp() {
     	try {
-    		jda = new JDABuilder(AccountType.BOT).setToken("NDc3MzYxMjIyNzkwOTM4NjI0.DlzmRA.hf_szqxGc_6xHeNTmevBAGOdq2E").buildAsync();
+    		jda = new JDABuilder(AccountType.BOT).setToken("NDc3MzYxMjIyNzkwOTM4NjI0.DlzmRA.hf_szqxGc_6xHeNTmevBAGOdq2E").build();
     	}catch(Exception e) {
     		Logger logger = Logger.getInstance();
     		logger.log(e);
@@ -86,11 +70,6 @@ public class Driver extends ListenerAdapter{
     		public void onStatusChange(StatusChangeEvent e) {
     			status.setText(jda.getStatus().toString());
     			if(jda.getStatus().toString().equals("CONNECTED")) {
-    				try {
-    					manager.stopCellThread();
-    				}catch(Exception d) {
-    					d.printStackTrace();
-    				}
     				manager = new ServerManager();
     				
     				for(Object al : jda.getRegisteredListeners()) {
@@ -103,7 +82,7 @@ public class Driver extends ListenerAdapter{
     		}
     	});
     	Logger logger = Logger.getInstance();
-    	logger.log("Set Listeners");
+    	logger.log("STARTUP: Set Listeners");
     }
     
     public static void restart() {

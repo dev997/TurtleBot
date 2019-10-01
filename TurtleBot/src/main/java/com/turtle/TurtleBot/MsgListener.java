@@ -1,8 +1,8 @@
 package com.turtle.TurtleBot;
 
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class MsgListener extends ListenerAdapter{
 	
@@ -52,28 +52,6 @@ public class MsgListener extends ListenerAdapter{
 			manager.changeVolume(content, event);
 		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"repeat")) {
 			manager.toggleRepeat(content, event);
-		}else if(content.startsWith(Driver.COMMAND_START+"move")) {
-			if(!Driver.disable) {
-				manager.moveMember(event, content);
-			}else {
-				event.getChannel().sendMessage("Command is currently disabled").queue();
-			}
-		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"scramble")) {
-			if(!Driver.disable) {
-				manager.moveAll(event, content);
-			}else {
-				event.getChannel().sendMessage("Command is currently disabled").queue();
-			}
-		}else if(content.equalsIgnoreCase(Driver.COMMAND_START+"cell count")) {
-			manager.getCells(event);
-		}else if(content.startsWith(Driver.COMMAND_START+"target")) {
-			manager.targetCells(event, content);
-		}else if(content.startsWith(Driver.COMMAND_START+"check")){
-			manager.checkCells(event, content);
-		}else if(content.startsWith(Driver.COMMAND_START+"give")) {
-			manager.giveCells(event, content);
-		}else if(content.startsWith(Driver.COMMAND_START+"take")){
-			manager.takeCells(event, content);
 		}else if(content.startsWith(Driver.COMMAND_START+"restart")) {
 			manager.restartBot(event);
 		}

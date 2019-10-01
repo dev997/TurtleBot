@@ -2,8 +2,9 @@ package com.turtle.TurtleBot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.sedmelluq.discord.lavaplayer.player.*;
@@ -13,18 +14,17 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeSearchProvider;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.*;
 
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.VoiceChannel;
-import net.dv8tion.jda.core.managers.AudioManager;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.managers.AudioManager;
 import java.net.URL;
 
 public class MusicHandler {
-	public AudioPlayerManager playermanager;
-	public AudioPlayer player;
-	public TrackScheduler trackScheduler;
-	public AudioManager audiomanager;
-	public List<AudioTrack> results;
-	public Timer timer;
+	private AudioPlayerManager playermanager;
+	private AudioPlayer player;
+	private TrackScheduler trackScheduler;
+	private AudioManager audiomanager;
+	private List<AudioTrack> results;
+	private ScheduledExecutorService scheduler;
 	private Guild server;
 	private Logger logger = Logger.getInstance();
 	
@@ -35,22 +35,22 @@ public class MusicHandler {
 		createAudioPlayer();
 	}
 	
+	@SuppressWarnings("unused")
 	public void initTimer() {
 		try {
-			timer.cancel();
+			scheduler.shutdownNow();
 		}catch(Exception e) {
-			System.out.println("Timer could not be cancelled, new timer created");
+			Logger.getInstance().log("Timer could not be cancelled, new timer created");
 		}
-		timer = new Timer(true);
-    	TimerTask timertask = new TimerTask() {
-    		public void run() {
-    			if(getPlayer().getPlayingTrack()==null) {
-    				leaveChannel();
+		scheduler = Executors.newScheduledThreadPool(1);
+    	Runnable cleantask = () -> {
+    			if(audiomanager.getConnectedChannel().getMembers().size()<2) {
+	    				Logger.getInstance().log("leaving channel: IDLE Track: "+player.getPlayingTrack()+" Player: "+player);
+	    				leaveChannel();
     			}
-    		}
     	};
     	
-    	timer.scheduleAtFixedRate(timertask, TimeUnit.MINUTES.toMillis(10), TimeUnit.MINUTES.toMillis(10));
+    	ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(cleantask, 5, 5, TimeUnit.MINUTES);
 	}
 	
 	public AudioPlayer getPlayer() {
@@ -72,9 +72,11 @@ public class MusicHandler {
 	}
 	
 	public void joinChannel(VoiceChannel voicechannel) {
-		initTimer();
-		audiomanager.setSendingHandler(new AudioPlayerSendHandler(player));
-		audiomanager.openAudioConnection(voicechannel);
+		if(!audiomanager.isConnected()) {
+			initTimer();
+			audiomanager.setSendingHandler(new AudioPlayerSendHandler(player));
+			audiomanager.openAudioConnection(voicechannel);
+		}
 	}
 	
 	public void leaveChannel() {
@@ -99,13 +101,13 @@ public class MusicHandler {
 
 			  @Override
 			  public void noMatches() {
-				  System.out.println("No Matches");
+				  Logger.getInstance().log("No Matches");
 				  leaveChannel();
 			  }
 
 			  @Override
 			  public void loadFailed(FriendlyException throwable) {
-				  System.out.println("Load Failed");
+				  Logger.getInstance().log("Load Failed");
 				  leaveChannel();
 			  }
 		});

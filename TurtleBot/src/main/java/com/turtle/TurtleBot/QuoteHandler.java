@@ -3,7 +3,9 @@ package com.turtle.TurtleBot;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,16 @@ public class QuoteHandler {
 	private List<String> quotes;
 	
 	public QuoteHandler() {
-		initQuoteList("src/main/quotes.txt");
+		try {
+			Path path = FileSystems.getDefault().getPath("src/main/quotes.txt");
+			if(!Files.exists(path)) {
+				Files.createDirectory(path);
+			}else {
+				initQuoteList("src/main/quotes.txt");
+			}
+		}catch(Exception e) {
+			Logger.getInstance().log(e);
+		}
 	}
 	
 	public List<String> getQuotes(){

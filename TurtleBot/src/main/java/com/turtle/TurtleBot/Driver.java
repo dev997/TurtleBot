@@ -70,11 +70,6 @@ public class Driver extends ListenerAdapter{
     		public void onStatusChange(StatusChangeEvent e) {
     			status.setText(jda.getStatus().toString());
     			if(jda.getStatus().toString().equals("CONNECTED")) {
-    				try {
-    					manager.stopCellThread();
-    				}catch(Exception d) {
-    					//d.printStackTrace();
-    				}
     				manager = new ServerManager();
     				
     				for(Object al : jda.getRegisteredListeners()) {
@@ -87,7 +82,7 @@ public class Driver extends ListenerAdapter{
     		}
     	});
     	Logger logger = Logger.getInstance();
-    	logger.log("Set Listeners");
+    	logger.log("STARTUP: Set Listeners");
     }
     
     public static void restart() {

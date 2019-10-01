@@ -40,7 +40,7 @@ public class TrackScheduler extends AudioEventAdapter {
     // something is playing, it returns false and does nothing. In that case the player was already playing so this
     // track goes to the queue instead.
     if (!player.startTrack(track, true)) {
-      queue.offer(track);
+    	queue.offer(track);
     }else {
     	updateRepeatTrack(track);
     }
@@ -48,8 +48,7 @@ public class TrackScheduler extends AudioEventAdapter {
   
   public void clearQueue() {
 	  queue.clear();
-	  Logger logger = Logger.getInstance();
-	  logger.log("Queue Cleared");
+	  Logger.getInstance().log("Queue Cleared");
   }
   
   public ArrayList<AudioTrackInfo> getQueue() {
@@ -71,12 +70,8 @@ public class TrackScheduler extends AudioEventAdapter {
 	if(repeat && repeatTrack!=null) {
 		updateRepeatTrack(repeatTrack);
 		player.startTrack(repeatTrack, false);
+		Logger.getInstance().log("Starting track from repeat: "+repeatTrack);
 	}else{
-		try {
-			updateRepeatTrack(queue.peek());
-		}catch(Exception e) {
-			
-		}
 		if(queue.isEmpty()) {
 			try {
 				player.stopTrack();
@@ -84,10 +79,12 @@ public class TrackScheduler extends AudioEventAdapter {
 				Logger logger = Logger.getInstance();
 				logger.log("New Queue loaded: "+e.getMessage());
 			}
+		}else {
+			updateRepeatTrack(queue.peek());
+			player.startTrack(queue.poll(), false);
+			Logger logger = Logger.getInstance();
+			logger.log("Next Song started: "+player.getPlayingTrack().getInfo().title);
 		}
-		player.startTrack(queue.poll(), false);
-		Logger logger = Logger.getInstance();
-		logger.log("Next Song started: "+player.getPlayingTrack().getInfo().title);
 	}
   }
 
@@ -104,7 +101,6 @@ public class TrackScheduler extends AudioEventAdapter {
   
   @Override
   public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs) {
-    System.out.println("Track Stuck");
     Logger logger = Logger.getInstance();
 	logger.log("Track Stuck");
   }
@@ -116,16 +112,13 @@ public class TrackScheduler extends AudioEventAdapter {
   }
   
   public boolean setRepeat() {
-	  if(repeat==false) {
-		  repeat=true;
-		  return true;
-	  }else {
-		  repeat=false;
-		  return false;
-	  }
+	  repeat = !repeat;
+	  return repeat;
   }
   
   public void updateRepeatTrack(AudioTrack track) {
-	  this.repeatTrack = track.makeClone();
+	  if(track!=null) {
+		  this.repeatTrack = track.makeClone();
+	  }
   }
 }

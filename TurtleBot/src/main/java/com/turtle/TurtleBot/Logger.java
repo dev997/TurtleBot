@@ -44,8 +44,9 @@ public class Logger {
 			}
 			FileWriter writer = new FileWriter("log\\"+getLogFile()+".txt", true);
 			writer.write(getTimeStamp(false)+"	"+e.toString()+"\n");
-			PrintWriter pw = new PrintWriter("log\\"+getLogFile()+".txt");
+			PrintWriter pw = new PrintWriter(writer);
 			e.printStackTrace(pw);
+			pw.close();
 			writer.close();
 		}catch(Exception x) {
 			x.printStackTrace();
@@ -60,11 +61,12 @@ public class Logger {
 	
 	private static String getTimeStamp(boolean forFileName) {
 		Calendar cal = Calendar.getInstance();
+		java.text.SimpleDateFormat fileform = new java.text.SimpleDateFormat("MMddYYYY");
+		java.text.SimpleDateFormat stampform = new java.text.SimpleDateFormat("MM/dd/YYYY-HH:mm");
 		if(forFileName) {
-			return Integer.toString(cal.get(Calendar.MONTH+1))+Integer.toString(cal.get(Calendar.DAY_OF_MONTH))+Integer.toString(cal.get(Calendar.YEAR));
+			return fileform.format(cal.getTime());
 		}else {
-			return Integer.toString(cal.get(Calendar.MONTH+1))+Integer.toString(cal.get(Calendar.DAY_OF_MONTH))+Integer.toString(cal.get(Calendar.YEAR))+
-					"-"+Integer.toString(cal.get(Calendar.HOUR))+":"+Integer.toString(cal.get(Calendar.MINUTE));
+			return stampform.format(cal.getTime());
 		}
 	}
 	

@@ -107,7 +107,7 @@ public class MusicHandler {
 
 			  @Override
 			  public void loadFailed(FriendlyException throwable) {
-				  Logger.getInstance().log("Load Failed");
+				  Logger.getInstance().log(throwable.getMessage());
 				  leaveChannel();
 			  }
 		});

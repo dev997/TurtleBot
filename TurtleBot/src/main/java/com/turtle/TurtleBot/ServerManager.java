@@ -331,7 +331,7 @@ public class ServerManager {
 			musicHandler.setVolume(level);
 			event.getChannel().sendMessage(message).queue();
 		}catch(Exception e) {
-			System.out.println("BAD TOUCH: volume level not an integer");
+			Logger.getInstance().log("BAD TOUCH: volume level not an integer");
 		}
 	}
 	

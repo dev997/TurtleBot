@@ -1,7 +1,9 @@
 package com.turtle.TurtleBot;
 
 import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -470,6 +472,30 @@ public class ServerManager {
 		}
 		
 		return eb.build();
+	}
+	
+	public void godWordsHappy(MessageReceivedEvent event) {
+		Random rand = new Random();
+		String s="";
+		String temp="";
+		int lines=0;
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader("src/main/happy.txt"));
+			while(reader.readLine() != null) lines++;
+			reader.close();
+			
+			for(int i=0; i<33; i++) {
+				reader = new BufferedReader(new FileReader("src/main/happy.txt"));
+				for(int j=0; j<rand.nextInt(lines-1)+1; j++) {
+					temp = reader.readLine();
+				}
+				s = s+temp+" ";
+			}
+			reader.close();
+			event.getChannel().sendMessage(s).queue();
+		}catch(Exception e) {
+			Logger.getInstance().log(e);
+		}
 	}
 	
 }

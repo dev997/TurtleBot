@@ -66,6 +66,7 @@ public class Driver{
     	}
     }
     
+    //removes listeners then initializes new ones
     public static void setListeners(JDA jda, JLabel status) {
     	ArrayList<Object> removeset = new ArrayList<Object>();
     	for(Object al : jda.getRegisteredListeners()) {
@@ -104,8 +105,10 @@ public class Driver{
     public static void configSetup() throws IOException{
     	try {
     		props = new Properties();
-    		props.load(Driver.class.getClassLoader().getResourceAsStream("src/main/config.cfg"));
+    		//eclipse needs just config.cfg anything else needs src/main/resources/config.cfg
+    		props.load(Driver.class.getClassLoader().getResourceAsStream("src/main/resources/config.cfg"));
     	}catch(Exception e) {
+    		Logger.getInstance().log(e);
     		Logger.getInstance().log("Writing new config file");
     		props = new Properties();
     		props.setProperty("token", "");

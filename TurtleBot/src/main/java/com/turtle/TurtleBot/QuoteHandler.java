@@ -12,17 +12,23 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
+import net.dv8tion.jda.api.entities.Guild;
+
 public class QuoteHandler {
 	
 	private List<String> quotes;
+	private Guild server;
+	private Path path=null;
 	
-	public QuoteHandler() {
+	public QuoteHandler(Guild server) {
+		this.server=server;
 		try {
-			Path path = FileSystems.getDefault().getPath("src/main/quotes.txt");
+			//Once again eclipse is dumb and wants it without src/main
+			path = FileSystems.getDefault().getPath("src/main/"+server.getName()+"_quotes.txt");
 			if(!Files.exists(path)) {
-				Files.createDirectory(path);
+				Files.createFile(path);
 			}else {
-				initQuoteList("src/main/quotes.txt");
+				initQuoteList(path);
 			}
 		}catch(Exception e) {
 			Logger.getInstance().log(e);
@@ -33,9 +39,9 @@ public class QuoteHandler {
 		return quotes;
 	}
 	
-	public void initQuoteList(String filename) {
+	public void initQuoteList(Path path) {
 		quotes = new ArrayList<String>();
-		try (Stream<String> stream = Files.lines(Paths.get(filename))) {
+		try (Stream<String> stream = Files.lines(path.getFileName())) {
 	        stream.forEach(s -> addToList(s));
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -50,7 +56,7 @@ public class QuoteHandler {
 	
 	public void saveQuotes() {
 		try {
-			File fout = new File("src/main/quotes.txt");
+			File fout = new File(path.toString());
 			FileOutputStream fos = new FileOutputStream(fout);
 			OutputStreamWriter osw = new OutputStreamWriter(fos);
 			
@@ -67,7 +73,11 @@ public class QuoteHandler {
 	
 	public String getRandQuote() {
 		Random rand = new Random();
-		int index = rand.nextInt(quotes.size()-1);
+		int index=0;
+		try {
+			index = rand.nextInt(quotes.size());
+		}catch(Exception e) {
+		}
 		return quotes.get(index);
 	}
 	
@@ -79,6 +89,10 @@ public class QuoteHandler {
 			e.printStackTrace();
 			return false;
 		}
+	}
+	
+	public Guild getServer() {
+		return server;
 	}
 	
 }

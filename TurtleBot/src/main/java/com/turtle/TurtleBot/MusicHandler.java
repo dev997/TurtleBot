@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 import com.sedmelluq.discord.lavaplayer.player.*;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
@@ -146,18 +149,22 @@ public class MusicHandler {
 	}
 	
 	public List<AudioTrack> searchItem(String query) {
-		YoutubeAudioSourceManager sourceManager = new YoutubeAudioSourceManager();
-		YoutubeSearchProvider ytsearchProvider = new YoutubeSearchProvider(sourceManager);
-		List<AudioTrack> results = new ArrayList<AudioTrack>();
+		YoutubeAudioSourceManager sourceManager = new YoutubeAudioSourceManager(true);
+		Semaphore lock = new Semaphore(0);
+		clearResults();
 		try {
 			new URL(query).toURI();
 			playTrack(query);
 			return results;
 		}catch(Exception e) {
 			logger.log("Searching for track: "+query);
-			AudioItem result = ytsearchProvider.loadSearchResult(query);
-			if(result instanceof BasicAudioPlaylist) {
-				results = ((BasicAudioPlaylist)result).getTracks();
+			playermanager.loadItem("ytsearch: "+query, new FunctionalResultHandler(null, playlist -> {
+				  results = playlist.getTracks();
+				  lock.release();
+		    }, null, null));
+			try {
+				lock.acquire();
+			}catch(Exception x) {
 			}
 			List<AudioTrack> finalresults = new ArrayList<AudioTrack>();
 			try {
@@ -179,6 +186,10 @@ public class MusicHandler {
 	
 	public List<AudioTrack> getResults() {
 		return results;
+	}
+	
+	public void clearResults() {
+		results=new ArrayList<AudioTrack>();
 	}
 	
 	public void setVolume(int level) {

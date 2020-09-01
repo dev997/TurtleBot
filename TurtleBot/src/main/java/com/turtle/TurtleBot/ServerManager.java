@@ -1,7 +1,9 @@
 package com.turtle.TurtleBot;
 
 import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -21,59 +23,64 @@ public class ServerManager {
 	List<MusicHandler> musichandlerlist = new ArrayList<MusicHandler>();
 	List<Guild> servers;
 	List<AudioTrack> results = new ArrayList<AudioTrack>();
-	public QuoteHandler quotehandler = new QuoteHandler();
+	List<QuoteHandler> quotehandlerList = new ArrayList<QuoteHandler>();
 	private String NO_PERMISSION = "You do not have permission to use this command!";
 	
 	public ServerManager() {
 		servers = Driver.jda.getGuilds();
 		for(Guild server : servers) {
 			musichandlerlist.add(new MusicHandler(server));
+			quotehandlerList.add(new QuoteHandler(server));
 		}
 	}
 	
 	public void sendQuote(MessageReceivedEvent event) {
-		event.getChannel().sendMessage(quotehandler.getRandQuote()).queue();
+		Guild server = event.getGuild();
+		event.getChannel().sendMessage(getServerQuoteHandler(server).getRandQuote()).queue();
 	}
 	
 	public void addQuote(String content, MessageReceivedEvent event) {
+		Guild server = event.getGuild();
 		MessageChannel channel = event.getChannel();
 		String quote = content.substring(10);
 		if(quote!=null && quote!=" " && quote!="") {
-			quotehandler.addToList(quote);
+			getServerQuoteHandler(server).addToList(quote);
 			channel.sendMessage(quote+" has been added to quotes").queue();
 		}else{
 			channel.sendMessage("Can't add blank quote").queue();
 		}
-		quotehandler.saveQuotes();
+		getServerQuoteHandler(server).saveQuotes();
 	}
 	
 	public void listQuotes(String content, MessageReceivedEvent event) {
+		Guild server = event.getGuild();
 		MessageChannel channel = event.getChannel();
-		List<String> quotes = quotehandler.getQuotes();
+		List<String> quotes = getServerQuoteHandler(server).getQuotes();
 		StringBuilder sb = new StringBuilder();
-		int i=1;
+		int i=0;
 		while(i<quotes.size()) {
 			sb = new StringBuilder();
 			for(int index=0; index<10; index++) {
 				if(i>=quotes.size()) {
 					break;
 				}
-				sb.append(i+". ");
+				sb.append(i+1+". ");
 				sb.append(quotes.get(i));
 				sb.append("\n");
 				i++;
 			}
 			channel.sendMessage(sb.toString()).queue();
 		}
-		quotehandler.saveQuotes();
 	}
 	
 	public void removeQuote(String content, MessageReceivedEvent event) {
+		Guild server = event.getGuild();
+		QuoteHandler quotehandler = getServerQuoteHandler(server);
 		MessageChannel channel = event.getChannel();
 		String indexmsg = content.substring(14);
 		List<String> quotes = quotehandler.getQuotes();
 		try {
-			int index = Integer.valueOf(indexmsg);
+			int index = Integer.valueOf(indexmsg)-1;
 			String quote = quotes.get(index);
 			if(quotehandler.removeQuote(index)){
 				channel.sendMessage(quote+"\n has been removed").queue();
@@ -470,6 +477,39 @@ public class ServerManager {
 		}
 		
 		return eb.build();
+	}
+	
+	public void godWordsHappy(MessageReceivedEvent event) {
+		Random rand = new Random();
+		String s="";
+		String temp="";
+		int lines=0;
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader("src/main/happy.txt"));
+			while(reader.readLine() != null) lines++;
+			reader.close();
+			
+			for(int i=0; i<33; i++) {
+				reader = new BufferedReader(new FileReader("src/main/happy.txt"));
+				for(int j=0; j<rand.nextInt(lines-1)+1; j++) {
+					temp = reader.readLine();
+				}
+				s = s+temp+" ";
+			}
+			reader.close();
+			event.getChannel().sendMessage(s).queue();
+		}catch(Exception e) {
+			Logger.getInstance().log(e);
+		}
+	}
+	
+	public QuoteHandler getServerQuoteHandler(Guild server) {
+		for(QuoteHandler handler : quotehandlerList) {
+			if(handler.getServer()==server) {
+				return handler;
+			}
+		}
+		return null;
 	}
 	
 }

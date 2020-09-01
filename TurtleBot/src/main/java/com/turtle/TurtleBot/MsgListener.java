@@ -54,6 +54,8 @@ public class MsgListener extends ListenerAdapter{
 			manager.toggleRepeat(content, event);
 		}else if(content.startsWith(Driver.COMMAND_START+"restart")) {
 			manager.restartBot(event);
+		}else if(content.equals(Driver.COMMAND_START+"godwordshappy")) {
+			manager.godWordsHappy(event);
 		}
 	}
 

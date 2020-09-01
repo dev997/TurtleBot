@@ -18,9 +18,9 @@ public class Driver{
 	
 	public static String COMMAND_START = "!";
 	public static JDA jda;
-	public static JLabel status;
 	public static ServerManager manager;
 	public static Properties props;
+	public static MainPanel mainPanel;
 
     public static void main( String[] args ) throws Exception
     {
@@ -29,31 +29,9 @@ public class Driver{
     	}catch (Exception e) {
     		Logger.getInstance().log("Could not finish config setup");
     	}
-    	
-    	JFrame frame = new JFrame();
-    	JPanel bottompanel = new JPanel(new FlowLayout());
-    	frame.setLayout(new BorderLayout());
-    	JPanel mainpanel = new JPanel(new FlowLayout());
-    	frame.add(mainpanel, BorderLayout.CENTER);
-    	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    	frame.setTitle("Turtle Bot");
-    	frame.setSize(300,100);
-    	frame.add(bottompanel, BorderLayout.SOUTH);
-    	
-    	status = new JLabel();
-    	
-    	JButton restartbutton = new JButton("Restart");
-    	restartbutton.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				restart();
-			}
-    	});
-    	
-    	mainpanel.add(status);
-    	mainpanel.add(restartbutton);
-    	frame.setVisible(true);
+    	mainPanel = new MainPanel();
     	startUp();
-    	setListeners(jda, status);
+    	setListeners(jda);
     }
     
     public static void startUp() {
@@ -67,7 +45,7 @@ public class Driver{
     }
     
     //removes listeners then initializes new ones
-    public static void setListeners(JDA jda, JLabel status) {
+    public static void setListeners(JDA jda) {
     	ArrayList<Object> removeset = new ArrayList<Object>();
     	for(Object al : jda.getRegisteredListeners()) {
     		removeset.add(al);
@@ -77,7 +55,7 @@ public class Driver{
     	}
     	jda.addEventListener(new ListenerAdapter() {
     		public void onStatusChange(StatusChangeEvent e) {
-    			status.setText(jda.getStatus().toString());
+    			mainPanel.setStatusLabelText(jda.getStatus().toString());
     			if(jda.getStatus().toString().equals("CONNECTED")) {
     				manager = new ServerManager();
     				
@@ -99,7 +77,7 @@ public class Driver{
     	logger.log("Restarting");
     	jda.shutdownNow();
     	startUp();
-    	setListeners(jda, status);
+    	setListeners(jda);
     }
     
     public static void configSetup() throws IOException{

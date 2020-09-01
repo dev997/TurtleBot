@@ -18,6 +18,12 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.managers.*;
 
+/***
+ * 
+ * @author Devin
+ *	This class controls the main functions of the bot, taking commands from the MsgListener
+ *
+ */
 public class ServerManager {
 	
 	List<MusicHandler> musichandlerlist = new ArrayList<MusicHandler>();
@@ -25,6 +31,7 @@ public class ServerManager {
 	List<AudioTrack> results = new ArrayList<AudioTrack>();
 	List<QuoteHandler> quotehandlerList = new ArrayList<QuoteHandler>();
 	private String NO_PERMISSION = "You do not have permission to use this command!";
+	private long messageID;
 	
 	public ServerManager() {
 		servers = Driver.jda.getGuilds();
@@ -163,15 +170,20 @@ public class ServerManager {
 					sb.add(i+". "+song.getInfo().title+" "+buildTimeString(event, song.getInfo(), false));
 					i++;
 				}
-				event.getChannel().sendMessage(buildEmbed("Results", sb)).queue();
+				event.getChannel().sendMessage(buildEmbed("Results", sb)).queue((message) -> {
+				    messageID = message.getIdLong();
+				});
 			}else {
-				event.getChannel().sendMessage("> No results for: "+searchToken).queue();
+				event.getChannel().sendMessage("> No results for: "+searchToken).queue((message) -> {
+				    messageID = message.getIdLong();
+				});
 			}
 		}
 		
 		if(addedtrack!=null) {
 			AudioTrackInfo info = addedtrack.getInfo();
 			event.getChannel().sendMessage("> Added to queue: "+info.title).queue();
+			event.getChannel().deleteMessageById(messageID).queue();
 		}
 	}
 	

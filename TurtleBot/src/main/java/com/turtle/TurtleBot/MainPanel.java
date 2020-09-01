@@ -54,7 +54,7 @@ public class MainPanel {
 	}
 	
 	public void setLogText(String text) {
-		logArea.setText(text);
+		logArea.setText(logArea.getText()+text);
 	}
 	
 }

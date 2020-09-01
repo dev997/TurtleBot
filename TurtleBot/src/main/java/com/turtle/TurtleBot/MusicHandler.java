@@ -47,7 +47,7 @@ public class MusicHandler {
 		}
 		scheduler = Executors.newScheduledThreadPool(1);
     	Runnable cleantask = () -> {
-    			if(audiomanager.getConnectedChannel().getMembers().size()<2) {
+    			if(player.getPlayingTrack()==null) {
 	    				Logger.getInstance().log("leaving channel: IDLE Track: "+player.getPlayingTrack()+" Player: "+player);
 	    				leaveChannel();
     			}

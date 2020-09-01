@@ -18,6 +18,12 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.managers.*;
 
+/***
+ * 
+ * @author Devin
+ *	This class controls the main functions of the bot, taking commands from the MsgListener
+ *
+ */
 public class ServerManager {
 	
 	List<MusicHandler> musichandlerlist = new ArrayList<MusicHandler>();

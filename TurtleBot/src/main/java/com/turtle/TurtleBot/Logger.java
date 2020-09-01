@@ -29,8 +29,9 @@ public class Logger {
 				Files.createDirectory(path);
 			}
 			FileWriter writer = new FileWriter("log\\"+getLogFile()+".txt", true);
-			writer.write(getTimeStamp(false)+"	"+s+"\n");
+			writer.write(getTimeStamp(false)+" "+s+"\n");
 			writer.close();
+			Driver.mainPanel.setLogText(getTimeStamp(false)+"	"+s+"\n");
 		}catch(Exception x) {
 			x.printStackTrace();
 		}
@@ -48,6 +49,7 @@ public class Logger {
 			e.printStackTrace(pw);
 			pw.close();
 			writer.close();
+			Driver.mainPanel.setLogText(getTimeStamp(false)+" "+e.toString()+"\n");
 		}catch(Exception x) {
 			x.printStackTrace();
 		}

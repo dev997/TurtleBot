@@ -6,7 +6,6 @@ import java.io.OutputStreamWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,7 +23,7 @@ public class QuoteHandler {
 		this.server=server;
 		try {
 			//Once again eclipse is dumb and wants it without src/main
-			path = FileSystems.getDefault().getPath("src/main/"+server.getName()+"_quotes.txt");
+			path = FileSystems.getDefault().getPath("src/main/data/"+server.getName()+"_quotes.txt");
 			if(!Files.exists(path)) {
 				Files.createFile(path);
 			}else {
@@ -41,7 +40,7 @@ public class QuoteHandler {
 	
 	public void initQuoteList(Path path) {
 		quotes = new ArrayList<String>();
-		try (Stream<String> stream = Files.lines(path.getFileName())) {
+		try (Stream<String> stream = Files.lines(path)) {
 	        stream.forEach(s -> addToList(s));
 		}catch(Exception e) {
 			e.printStackTrace();

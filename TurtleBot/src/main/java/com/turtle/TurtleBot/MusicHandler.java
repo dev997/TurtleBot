@@ -180,7 +180,6 @@ public class MusicHandler {
 	}
 	
 	public void addToResults(AudioTrack track){
-		results = new ArrayList<AudioTrack>();
 		results.add(track);
 	}
 	

@@ -106,6 +106,10 @@ public class ServerManager {
 		MusicHandler musicHandler = null;
 		Guild guild = event.getGuild();
 		AudioManager audiomanager = guild.getAudioManager();
+		if(event.getMember().getVoiceState().getChannel()==null) {
+			event.getChannel().sendMessage("You're not in a voice channel").queue();
+			return;
+		}
 		for(MusicHandler handler : musichandlerlist) {
 			if(handler.getServer() == guild) {
 				if(!handler.hasManager()) {

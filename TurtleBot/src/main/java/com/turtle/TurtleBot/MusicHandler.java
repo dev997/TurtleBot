@@ -47,7 +47,7 @@ public class MusicHandler {
 		}
 		scheduler = Executors.newScheduledThreadPool(1);
     	Runnable cleantask = () -> {
-    			if(player.getPlayingTrack()==null) {
+    			if(player.getPlayingTrack()==null && audiomanager.isConnected()) {
 	    				Logger.getInstance().log("leaving channel: IDLE Track: "+player.getPlayingTrack()+" Player: "+player);
 	    				leaveChannel();
     			}

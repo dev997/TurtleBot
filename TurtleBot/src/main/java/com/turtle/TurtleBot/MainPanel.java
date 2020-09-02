@@ -1,6 +1,7 @@
 package com.turtle.TurtleBot;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -17,19 +18,19 @@ public class MainPanel {
 	
 	public void initializeComponents() {
 		JFrame frame = new JFrame();
-    	JPanel bottompanel = new JPanel();
+    	JPanel toppanel = new JPanel();
     	frame.setLayout(new BorderLayout());
-    	JPanel mainpanel = new JPanel();
+    	JPanel mainpanel = new JPanel(new BorderLayout());
+    	mainpanel.add(toppanel, BorderLayout.NORTH);
     	frame.add(mainpanel, BorderLayout.CENTER);
     	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	frame.setTitle("Turtle Bot");
     	frame.setSize(400,200);
     	
-    	logArea = new JTextArea(7,32);
+    	logArea = new JTextArea();
     	logArea.setEditable(false);
     	JScrollPane logScroller = new JScrollPane(logArea);
-    	bottompanel.add(logScroller);
-    	frame.add(bottompanel, BorderLayout.SOUTH);
+    	mainpanel.add(logScroller);
     	
     	statusLabel = new JLabel();
     	
@@ -40,8 +41,8 @@ public class MainPanel {
 			}
     	});
     	
-    	mainpanel.add(statusLabel);
-    	mainpanel.add(restartbutton);
+    	toppanel.add(statusLabel);
+    	toppanel.add(restartbutton);
     	frame.setVisible(true);
 	}
 	

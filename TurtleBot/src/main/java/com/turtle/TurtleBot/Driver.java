@@ -84,14 +84,14 @@ public class Driver{
     	try {
     		props = new Properties();
     		//eclipse needs just config.cfg anything else needs src/main/resources/config.cfg
-    		props.load(Driver.class.getClassLoader().getResourceAsStream("config.cfg"));
+    		props.load(Driver.class.getClassLoader().getResourceAsStream("src/main/resources/config.cfg"));
     	}catch(Exception e) {
     		Logger.getInstance().log(e);
     		Logger.getInstance().log("Writing new config file");
     		props = new Properties();
     		props.setProperty("token", "");
     		
-    		props.store(new FileOutputStream("src/main/config.cfg"), null);
+    		props.store(new FileOutputStream("src/main/resources/config.cfg"), null);
     	}
     }
 }

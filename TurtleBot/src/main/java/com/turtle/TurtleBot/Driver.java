@@ -91,7 +91,7 @@ public class Driver{
     		props = new Properties();
     		props.setProperty("token", "");
     		
-    		props.store(new FileOutputStream("src/main/config.cfg"), null);
+    		props.store(new FileOutputStream("src/main/resources/config.cfg"), null);
     	}
     }
 }

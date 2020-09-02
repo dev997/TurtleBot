@@ -7,6 +7,9 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -32,6 +35,7 @@ public class ServerManager {
 	List<QuoteHandler> quotehandlerList = new ArrayList<QuoteHandler>();
 	private String NO_PERMISSION = "You do not have permission to use this command!";
 	private long messageID;
+	private ScheduledExecutorService scheduler;
 	
 	public ServerManager() {
 		servers = Driver.jda.getGuilds();
@@ -39,6 +43,24 @@ public class ServerManager {
 			musichandlerlist.add(new MusicHandler(server));
 			quotehandlerList.add(new QuoteHandler(server));
 		}
+		
+		scheduler = Executors.newScheduledThreadPool(1);
+    	Runnable pressence = () -> {
+    		Driver.jda.getPresence().setActivity(getRandomActivity());
+    	};
+		
+    	ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(pressence, 0, 1, TimeUnit.MINUTES);
+	}
+	
+	private Activity getRandomActivity() {
+		ArrayList<String> activities = new ArrayList<String>();
+		activities.add("!help");
+		activities.add("!quote");
+		activities.add("!play <song>");
+		activities.add("<3");
+		Random rand = new Random();
+		Activity activity = Activity.of(Activity.ActivityType.DEFAULT, activities.get(rand.nextInt(activities.size()-1)));
+		return activity;
 	}
 	
 	public void sendQuote(MessageReceivedEvent event) {
@@ -81,6 +103,9 @@ public class ServerManager {
 	}
 	
 	public void removeQuote(String content, MessageReceivedEvent event) {
+		if(!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+			return;
+		}
 		Guild server = event.getGuild();
 		QuoteHandler quotehandler = getServerQuoteHandler(server);
 		MessageChannel channel = event.getChannel();
